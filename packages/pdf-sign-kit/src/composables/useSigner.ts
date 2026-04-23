@@ -4,7 +4,11 @@ import { computeSha256, applyValuesToPdf, valuesToFieldArray } from '../utils/si
 
 export type SignerInfo = { id?: string; name?: string; email?: string; role?: string } | null;
 
-export function useSignerManager(template: Template, originalPdfBytes: ArrayBuffer | null, signer: SignerInfo = null) {
+export function useSignerManager(
+  template: Template,
+  originalPdfBytes: ArrayBuffer | null,
+  signer: SignerInfo = null,
+) {
   const values = ref<Record<string, string | boolean | null>>({});
   const errors = ref<Record<string, string>>({});
 
@@ -35,7 +39,10 @@ export function useSignerManager(template: Template, originalPdfBytes: ArrayBuff
       const v = values.value[f.id];
       if (f.required) {
         if (v === null || v === undefined || v === '') {
-          out[f.id] = f.validation && (f.validation as any).message ? (f.validation as any).message : 'Required';
+          out[f.id] =
+            f.validation && (f.validation as any).message
+              ? (f.validation as any).message
+              : 'Required';
           continue;
         }
       }
@@ -46,7 +53,7 @@ export function useSignerManager(template: Template, originalPdfBytes: ArrayBuff
         }
         if (f.type === 'email') {
           const emailRegex = /\S+@\S+\.\S+/;
-          if (!(emailRegex.test(v as string))) out[f.id] = 'Invalid email';
+          if (!emailRegex.test(v as string)) out[f.id] = 'Invalid email';
         }
       }
     }
@@ -54,7 +61,11 @@ export function useSignerManager(template: Template, originalPdfBytes: ArrayBuff
     return { ok: Object.keys(out).length === 0, errors: out };
   }
 
-  async function finalize(options?: { mode?: 'standard' | 'integrity'; expected?: { templateHash?: string; pdfHash?: string }; signerInfo?: { id?: string; name?: string; email?: string } }) {
+  async function finalize(options?: {
+    mode?: 'standard' | 'integrity';
+    expected?: { templateHash?: string; pdfHash?: string };
+    signerInfo?: { id?: string; name?: string; email?: string };
+  }) {
     const { mode = 'standard', expected, signerInfo } = options || {};
     // perform validation first
     const v = validate();
@@ -75,7 +86,8 @@ export function useSignerManager(template: Template, originalPdfBytes: ArrayBuff
     const integrityDetails: Record<string, unknown> = {};
     if (mode === 'integrity' && expected) {
       if (expected.templateHash && expected.templateHash !== templateHash) integrityOk = false;
-      if (expected.pdfHash && originalPdfHash && expected.pdfHash !== originalPdfHash) integrityOk = false;
+      if (expected.pdfHash && originalPdfHash && expected.pdfHash !== originalPdfHash)
+        integrityOk = false;
       integrityDetails.expected = expected;
     }
 
@@ -89,7 +101,9 @@ export function useSignerManager(template: Template, originalPdfBytes: ArrayBuff
       templateVersion: template.version,
       pdfHash: originalPdfHash ?? undefined,
       signedAt: new Date().toISOString(),
-      signer: signerInfo ? { name: signerInfo.name, email: signerInfo.email, id: signerInfo.id } : undefined,
+      signer: signerInfo
+        ? { name: signerInfo.name, email: signerInfo.email, id: signerInfo.id }
+        : undefined,
       fields: valuesToFieldArray(values.value),
       integrity: {
         templateHash,

@@ -19,7 +19,7 @@ function dataUrlToUint8Array(dataUrl: string): Uint8Array {
 export async function applyValuesToPdf(
   pdfBytes: ArrayBuffer,
   template: Template,
-  values: Record<string, string | boolean | null>
+  values: Record<string, string | boolean | null>,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const pages = pdfDoc.getPages();
@@ -35,12 +35,18 @@ export async function applyValuesToPdf(
     const w = field.width * pageWidth;
     const h = field.height * pageHeight;
     // pdf-lib coordinate system origin is bottom-left
-    const y = pageHeight - (field.y * pageHeight) - h;
+    const y = pageHeight - field.y * pageHeight - h;
 
     const raw = values[field.id];
     if (raw == null) continue;
 
-    if (field.type === 'text' || field.type === 'name' || field.type === 'email' || field.type === 'date' || field.type === 'current_date') {
+    if (
+      field.type === 'text' ||
+      field.type === 'name' ||
+      field.type === 'email' ||
+      field.type === 'date' ||
+      field.type === 'current_date'
+    ) {
       const text = String(raw);
       const fontSize = Math.max(8, Math.min(14, h * 0.6));
       page.drawText(text, {
@@ -72,8 +78,18 @@ export async function applyValuesToPdf(
       const checked = raw === true || raw === 'true';
       if (checked) {
         // draw simple X
-        page.drawLine({ start: { x: x + 2, y: y + 2 }, end: { x: x + w - 2, y: y + h - 2 }, thickness: 1, color: rgb(0, 0, 0) });
-        page.drawLine({ start: { x: x + w - 2, y: y + 2 }, end: { x: x + 2, y: y + h - 2 }, thickness: 1, color: rgb(0, 0, 0) });
+        page.drawLine({
+          start: { x: x + 2, y: y + 2 },
+          end: { x: x + w - 2, y: y + h - 2 },
+          thickness: 1,
+          color: rgb(0, 0, 0),
+        });
+        page.drawLine({
+          start: { x: x + w - 2, y: y + 2 },
+          end: { x: x + 2, y: y + h - 2 },
+          thickness: 1,
+          color: rgb(0, 0, 0),
+        });
       }
     }
   }
@@ -83,5 +99,8 @@ export async function applyValuesToPdf(
 }
 
 export function valuesToFieldArray(values: Record<string, string | boolean | null>): FieldValue[] {
-  return Object.keys(values).map((k) => ({ fieldId: k, value: values[k] === null ? null : String(values[k]) }));
+  return Object.keys(values).map((k) => ({
+    fieldId: k,
+    value: values[k] === null ? null : String(values[k]),
+  }));
 }

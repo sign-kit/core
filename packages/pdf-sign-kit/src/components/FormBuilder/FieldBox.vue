@@ -1,7 +1,7 @@
 <template>
   <div class="field-box" :style="style" @pointerdown.stop="onPointerDown" ref="root">
     <div class="label" ref="labelRef">{{ field.label || field.type }}</div>
-      <button class="field-delete" ref="deleteRef" @click.stop="onDelete">✕</button>
+    <button class="field-delete" ref="deleteRef" @click.stop="onDelete">✕</button>
     <div class="field-handle br" @pointerdown.stop.prevent="onResizeDown"></div>
   </div>
 </template>
@@ -50,7 +50,12 @@ function onPointerDown(e: PointerEvent) {
   if (!overlayEl || !root.value) return;
   const target = e.target as HTMLElement | null;
   // If the pointerdown started on the delete button or resize handle, don't start a drag here.
-  if (target && (target.closest('.field-delete') || target.closest('.field-handle') || target.tagName === 'BUTTON')) {
+  if (
+    target &&
+    (target.closest('.field-delete') ||
+      target.closest('.field-handle') ||
+      target.tagName === 'BUTTON')
+  ) {
     return;
   }
   const overlayRect = overlayEl.getBoundingClientRect();
@@ -64,7 +69,9 @@ function onPointerDown(e: PointerEvent) {
   const offsetY = startY - fieldRect.top;
   const pointerId = e.pointerId;
 
-  try { (root.value as HTMLElement).setPointerCapture(pointerId); } catch {}
+  try {
+    (root.value as HTMLElement).setPointerCapture(pointerId);
+  } catch {}
 
   isDragging.value = true;
   currentDx = 0;
@@ -86,7 +93,9 @@ function onPointerDown(e: PointerEvent) {
   };
 
   const up = (ev?: PointerEvent) => {
-    try { (root.value as HTMLElement).releasePointerCapture(pointerId); } catch {}
+    try {
+      (root.value as HTMLElement).releasePointerCapture(pointerId);
+    } catch {}
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
     isDragging.value = false;
@@ -97,8 +106,8 @@ function onPointerDown(e: PointerEvent) {
     }
     // commit final position
     const f = { ...props.field };
-    const finalLeft = (fieldRect.left - overlayRect.left) + currentDx;
-    const finalTop = (fieldRect.top - overlayRect.top) + currentDy;
+    const finalLeft = fieldRect.left - overlayRect.left + currentDx;
+    const finalTop = fieldRect.top - overlayRect.top + currentDy;
     const nx = Math.max(0, Math.min(1 - f.width, finalLeft / pageW));
     const ny = Math.max(0, Math.min(1 - f.height, finalTop / pageH));
     emit('update-field', { id: f.id, x: nx, y: ny });
@@ -117,7 +126,9 @@ function onResizeDown(e: PointerEvent) {
   const pageW = props.pageSize.width * props.scale;
   const pageH = props.pageSize.height * props.scale;
 
-  try { (root.value as HTMLElement).setPointerCapture(e.pointerId); } catch {}
+  try {
+    (root.value as HTMLElement).setPointerCapture(e.pointerId);
+  } catch {}
 
   const f = { ...props.field };
   const initialLeft = f.x * pageW;
@@ -125,7 +136,7 @@ function onResizeDown(e: PointerEvent) {
 
   // compute minimum sizes in pixels based on label and delete button
   const minLabelWidth = labelRef.value ? labelRef.value.scrollWidth + 12 : 40; // padding
-  const deleteWidth = deleteRef.value ? (deleteRef.value.offsetWidth || 20) : 20;
+  const deleteWidth = deleteRef.value ? deleteRef.value.offsetWidth || 20 : 20;
   const minWidthPx = Math.max(40, minLabelWidth + deleteWidth + 8);
   const minHeightPx = Math.max(20, labelRef.value ? labelRef.value.scrollHeight + 8 : 20);
 
@@ -141,7 +152,9 @@ function onResizeDown(e: PointerEvent) {
   };
 
   const up = () => {
-    try { (root.value as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    try {
+      (root.value as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
     if (root.value) {

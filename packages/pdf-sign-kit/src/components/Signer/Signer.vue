@@ -52,7 +52,11 @@
     <div v-if="activePadField" class="modal-backdrop">
       <div class="modal">
         <h3>Sign: {{ activePadField.label || activePadField.id }}</h3>
-        <SignaturePad ref="padRef" :width="Math.max(300, padWidth)" :height="Math.max(120, padHeight)" />
+        <SignaturePad
+          ref="padRef"
+          :width="Math.max(300, padWidth)"
+          :height="Math.max(120, padHeight)"
+        />
         <div class="modal-actions">
           <button @click="savePad">Save</button>
           <button @click="closePad">Cancel</button>
@@ -77,7 +81,7 @@
 
     <div class="actions">
       <div class="errors" v-if="Object.keys(errors).length">
-        <div v-for="(msg,id) in errors" :key="id" class="err">{{ msg }}</div>
+        <div v-for="(msg, id) in errors" :key="id" class="err">{{ msg }}</div>
       </div>
       <button @click="handleFinalize">Finalize & Download</button>
     </div>
@@ -151,7 +155,11 @@ onMounted(() => {
   ensurePdfBytes();
 });
 
-const signerManager = useSignerManager(props.template, originalPdfBytes.value, props.signer ?? null);
+const signerManager = useSignerManager(
+  props.template,
+  originalPdfBytes.value,
+  props.signer ?? null,
+);
 const values = signerManager.values as any;
 const errors = signerManager.errors as any;
 
@@ -224,7 +232,7 @@ function openTyped(f: Field) {
     typedCanvasH.value = Math.max(80, Math.floor(f.height * sz.height));
   }
   typedText.value = props.signer?.name ?? '';
-  nextTick(()=> renderTypedPreview());
+  nextTick(() => renderTypedPreview());
 }
 
 function closeTyped() {
@@ -236,14 +244,14 @@ function renderTypedPreview() {
   if (!c) return;
   const ctx = c.getContext('2d');
   if (!ctx) return;
-  ctx.clearRect(0,0,c.width,c.height);
+  ctx.clearRect(0, 0, c.width, c.height);
   ctx.fillStyle = '#fff';
-  ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillRect(0, 0, c.width, c.height);
   ctx.fillStyle = '#000';
   const fontSize = Math.max(20, Math.floor(c.height * 0.5));
   ctx.font = `${fontSize}px Pacifico, cursive, serif`;
   ctx.textBaseline = 'middle';
-  ctx.fillText(typedText.value || '', 10, c.height/2);
+  ctx.fillText(typedText.value || '', 10, c.height / 2);
 }
 
 function saveTyped() {
@@ -256,9 +264,17 @@ function saveTyped() {
 // finalize
 async function handleFinalize() {
   try {
-    const { signedPdfBytes, manifest } = await signerManager.finalize({ mode, expected: props.expected ?? undefined, signerInfo: props.signer });
+    const { signedPdfBytes, manifest } = await signerManager.finalize({
+      mode,
+      expected: props.expected ?? undefined,
+      signerInfo: props.signer,
+    });
     const blob = new Blob([signedPdfBytes], { type: 'application/pdf' });
-    emit('finalized', { values: Object.entries(values).map(([k,v]) => ({ fieldId:k, value: v })), signedPdf: blob, manifest });
+    emit('finalized', {
+      values: Object.entries(values).map(([k, v]) => ({ fieldId: k, value: v })),
+      signedPdf: blob,
+      manifest,
+    });
     // also trigger download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -288,7 +304,9 @@ async function computeIntegrity() {
 onMounted(() => computeIntegrity());
 
 // helpers
-function setValue(fieldId: string, v: any) { values[fieldId] = v; }
+function setValue(fieldId: string, v: any) {
+  values[fieldId] = v;
+}
 
 // refs for pad/typed canvas
 const padRefAny = padRef;
@@ -300,30 +318,108 @@ const pageSizesLocal = pageSizes;
 const padRefExport = padRefAny;
 
 // typed canvas ref assigner
-function setTypedCanvas(el: HTMLCanvasElement | null) { typedCanvas.value = el; }
+function setTypedCanvas(el: HTMLCanvasElement | null) {
+  typedCanvas.value = el;
+}
 
 // export for template usage
 const fieldsOnPageExport = fieldsOnPage;
-
 </script>
 
 <style scoped>
-.signer-root { font-family: system-ui,Segoe UI,Roboto,Helvetica,Arial; }
-.pages { display: flex; flex-direction: column; gap: 16px; }
-.page-wrapper { display:flex; justify-content:center; }
-.page-canvas-wrap { position: relative; background: #eee; }
-.page-canvas { display:block; }
-.overlay { position:absolute; left:0; top:0; right:0; bottom:0; pointer-events:auto; }
-.field-overlay { position:absolute; box-sizing:border-box; pointer-events:auto; }
-.field-overlay input[type="text"], .field-overlay input[type="date"] { width:100%; height:100%; box-sizing:border-box; }
-.signature-field { display:flex; flex-direction:column; align-items:center; gap:6px; }
-.sig-preview { max-width:100%; max-height:100%; object-fit:contain; }
-.empty-sig { font-size:12px; color:#888; }
-.sig-actions button { margin-right:6px; }
-.modal-backdrop { position:fixed; left:0; right:0; top:0; bottom:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; }
-.modal { background:#fff; padding:16px; border-radius:6px; min-width:320px; }
-.modal-actions { display:flex; gap:8px; margin-top:8px; }
-.actions { margin-top:12px; }
-.errors { color:#a00; }
-.integrity-banner { background:#fffae6; padding:6px; margin-bottom:8px; border:1px solid #f0e6b2; }
+.signer-root {
+  font-family:
+    system-ui,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial;
+}
+.pages {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+}
+.page-canvas-wrap {
+  position: relative;
+  background: #eee;
+}
+.page-canvas {
+  display: block;
+}
+.overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: auto;
+}
+.field-overlay {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+.field-overlay input[type='text'],
+.field-overlay input[type='date'] {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+.signature-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.sig-preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.empty-sig {
+  font-size: 12px;
+  color: #888;
+}
+.sig-actions button {
+  margin-right: 6px;
+}
+.modal-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background: #fff;
+  padding: 16px;
+  border-radius: 6px;
+  min-width: 320px;
+}
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.actions {
+  margin-top: 12px;
+}
+.errors {
+  color: #a00;
+}
+.integrity-banner {
+  background: #fffae6;
+  padding: 6px;
+  margin-bottom: 8px;
+  border: 1px solid #f0e6b2;
+}
 </style>

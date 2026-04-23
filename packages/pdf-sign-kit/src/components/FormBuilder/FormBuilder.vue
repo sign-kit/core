@@ -1,58 +1,58 @@
 <template>
   <div class="pdf-builder">
     <div class="pdf-builder__toolbar">
-        <slot name="toolbar">
-          <div class="toolbar-left">
-            <button @click="zoomIn">Zoom +</button>
-            <button @click="zoomOut">Zoom -</button>
-            <button @click="exportTemplateAction">Export</button>
-          </div>
-        </slot>
-      </div>
+      <slot name="toolbar">
+        <div class="toolbar-left">
+          <button @click="zoomIn">Zoom +</button>
+          <button @click="zoomOut">Zoom -</button>
+          <button @click="exportTemplateAction">Export</button>
+        </div>
+      </slot>
+    </div>
 
-      <div class="pdf-builder__content">
-        <div class="pdf-builder__viewer" ref="viewerRef">
-          <div v-for="(size, idx) in pageSizes" :key="idx" class="pdf-page" :style="pageStyle(size)">
-            <canvas :ref="setCanvasRef(idx)" class="pdf-canvas"></canvas>
-            <div
-              class="overlay"
-              :style="overlayStyle(size)"
-              @dragover.prevent
-              @drop.stop.prevent="onDrop($event, idx)"
-              :ref="(el) => setOverlayRef(el, idx)"
-            >
-              <FieldBox
-                v-for="f in fieldsOnPage(idx)"
-                :key="f.id"
-                :field="f"
-                :pageSize="size"
-                :scale="scale"
-                @update-field="onUpdateField"
-                @delete-field="onDeleteField"
-                @drag-end="onFieldDragEnd"
-              />
-            </div>
+    <div class="pdf-builder__content">
+      <div class="pdf-builder__viewer" ref="viewerRef">
+        <div v-for="(size, idx) in pageSizes" :key="idx" class="pdf-page" :style="pageStyle(size)">
+          <canvas :ref="setCanvasRef(idx)" class="pdf-canvas"></canvas>
+          <div
+            class="overlay"
+            :style="overlayStyle(size)"
+            @dragover.prevent
+            @drop.stop.prevent="onDrop($event, idx)"
+            :ref="(el) => setOverlayRef(el, idx)"
+          >
+            <FieldBox
+              v-for="f in fieldsOnPage(idx)"
+              :key="f.id"
+              :field="f"
+              :pageSize="size"
+              :scale="scale"
+              @update-field="onUpdateField"
+              @delete-field="onDeleteField"
+              @drag-end="onFieldDragEnd"
+            />
           </div>
         </div>
-
-        <aside class="pdf-builder__bank">
-          <h4>Fields</h4>
-          <div class="bank-list">
-            <div
-              v-for="t in fieldTypes"
-              :key="t"
-              class="bank-item"
-              draggable="true"
-              @dragstart="onDragStart($event, t)"
-              @click="setActiveType(t)"
-              :class="{ active: activeType === t }"
-            >
-              {{ t }}
-            </div>
-          </div>
-          <div class="bank-hint">Drag a field onto the page to add it.</div>
-        </aside>
       </div>
+
+      <aside class="pdf-builder__bank">
+        <h4>Fields</h4>
+        <div class="bank-list">
+          <div
+            v-for="t in fieldTypes"
+            :key="t"
+            class="bank-item"
+            draggable="true"
+            @dragstart="onDragStart($event, t)"
+            @click="setActiveType(t)"
+            :class="{ active: activeType === t }"
+          >
+            {{ t }}
+          </div>
+        </div>
+        <div class="bank-hint">Drag a field onto the page to add it.</div>
+      </aside>
+    </div>
   </div>
 </template>
 
@@ -187,7 +187,14 @@ function onDrop(ev: DragEvent, pageIndex: number) {
   const def = defaultSizes[type] || { w: 0.18, h: 0.05 };
   const boxW = def.w * pxW;
   const boxH = def.h * pxH;
-  const norm = pixelsToNormalized(dropX - boxW / 2, dropY - boxH / 2, boxW, boxH, pageSize, scale.value);
+  const norm = pixelsToNormalized(
+    dropX - boxW / 2,
+    dropY - boxH / 2,
+    boxW,
+    boxH,
+    pageSize,
+    scale.value,
+  );
   const field = addField({
     type: type as any,
     page: pageIndex,

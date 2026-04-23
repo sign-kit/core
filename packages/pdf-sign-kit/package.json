@@ -13,8 +13,8 @@
   },
   "peerDependencies": {
     "vue": "^3.2"
-  }
-  ,"dependencies": {
+  },
+  "dependencies": {
     "pdf-lib": "^1.17.1"
   }
 }
