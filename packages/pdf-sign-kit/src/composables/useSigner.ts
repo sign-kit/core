@@ -75,7 +75,7 @@ export function useSignerManager(
     verificationMode?: 'disabled' | 'warn' | 'strict';
     allowOverride?: boolean;
   }) {
-    const { mode = 'standard', expected, signerInfo, embedPdfHash = false } = options || {};
+    const { mode = 'standard', signerInfo, embedPdfHash = false } = options || {};
     // perform validation first
     const v = validate();
     if (!v.ok) throw { validation: v.errors };

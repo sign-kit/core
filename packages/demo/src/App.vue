@@ -1,90 +1,43 @@
 <template>
   <div class="demo-root">
     <header class="demo-header">
-      <h1>pdf-sign-kit demo</h1>
-      <div class="tabs">
-        <button :class="{ active: mode === 'template' }" @click="mode = 'template'">
-          Template
-        </button>
-        <button :class="{ active: mode === 'sign' }" @click="mode = 'sign'">Sign</button>
+      <div class="logo-group">
+        <img src="/logo-horizontal-dev.png" style="height: 50px; width: auto; display: block" />
+        <h1>Demo</h1>
       </div>
+      <nav class="nav">
+        <router-link to="/builder">Builder</router-link>
+        <router-link to="/signer">Signer</router-link>
+        <router-link to="/integrity">Integrity</router-link>
+      </nav>
     </header>
 
-    <main class="demo-grid">
-      <aside class="demo-setup">
-        <h3>Setup</h3>
-        <label>PDF URL</label>
+    <main class="demo-main">
+      <aside class="demo-sidebar" @dragover.prevent @drop.prevent="handleDrop">
+        <h4>Sample PDF</h4>
         <input v-model="pdfUrl" />
-
-        <div class="block">
-          <label>Component</label>
-          <div class="chip">{{ mode === 'template' ? 'FormBuilder' : 'Signer' }}</div>
+        <div style="margin-top: 12px">
+          <button @click="loadSample">Load sample.pdf</button>
         </div>
-
-        <div v-if="mode === 'sign'">
-          <h4>Signer props</h4>
-          <label>Signer name</label>
-          <input v-model="signerName" />
-          <label>Signer email</label>
-          <input v-model="signerEmail" />
-          <label>Signer role (optional)</label>
-          <input v-model="signerRole" />
-          <label>Mode</label>
-          <select v-model="signerMode">
-            <option value="standard">standard</option>
-            <option value="integrity">integrity</option>
-          </select>
-          <label><input type="checkbox" v-model="embedPdfHash" /> Embed pdfHash on final PDF</label>
-          <label><input type="checkbox" v-model="signerReadonly" /> Readonly</label>
-          <label>Expected templateHash (for integrity)</label>
-          <input v-model="expectedTemplateHash" />
-          <label>Expected pdfHash (for integrity)</label>
-          <input v-model="expectedPdfHash" />
-        </div>
-
-        <div v-if="mode === 'template'" style="margin-top: 12px">
-          <h4>Template</h4>
-          <button @click="loadDefault">Load default template</button>
-          <div style="margin-top: 8px">
-            <label>Edit JSON</label>
-            <textarea v-model="templateJsonText" rows="10"></textarea>
-            <div class="row">
-              <button @click="applyTemplateJson">Apply JSON</button>
-              <button @click="resetTemplateJson">Reset</button>
-            </div>
-            <div v-if="templateJsonError" class="err">{{ templateJsonError }}</div>
-          </div>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--color-text-muted)">
+          Or drag & drop a PDF onto this panel
         </div>
       </aside>
 
-      <section class="demo-render">
-        <h3>Rendered component</h3>
-        <div class="component-wrap">
-          <FormBuilder v-if="mode === 'template'" :pdf="pdfUrl" v-model="template" />
-          <Signer
-            v-else
-            :pdfSrc="pdfUrl"
-            :template="template"
-            :signer="{ name: signerName, email: signerEmail, role: signerRole }"
-            :mode="signerMode"
-            :expected="{
-              templateHash: expectedTemplateHash || undefined,
-              pdfHash: expectedPdfHash || undefined,
-            }"
-            :readonly="signerReadonly"
-            :embedPdfHash="embedPdfHash"
-            @finalized="onFinalized"
-          />
-        </div>
+      <section class="demo-content">
+        <router-view />
       </section>
 
-      <aside class="demo-manifest">
-        <h3>Manifest</h3>
-        <div v-if="lastManifest">
-          <pre>{{ JSON.stringify(lastManifest, null, 2) }}</pre>
+      <aside class="demo-inspect">
+        <h4>Events & Manifest</h4>
+        <div class="log">
+          <pre v-if="eventLog.length">{{ eventLog.join('\n') }}</pre>
+          <div v-else class="muted">No events yet</div>
         </div>
-        <div v-else>
-          <p>No manifest yet. Finalize a signature to generate one.</p>
+        <h4 style="margin-top: 12px">Manifest</h4>
+        <div class="manifest">
+          <pre v-if="manifest">{{ JSON.stringify(manifest, null, 2) }}</pre>
+          <div v-else class="muted">No manifest</div>
         </div>
       </aside>
     </main>
@@ -92,189 +45,89 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { FormBuilder, Signer } from '../../pdf-sign-kit/src';
-
-import { watch } from 'vue';
+import { ref, provide } from 'vue';
 
 const pdfUrl = ref('/sample/sample.pdf');
+const eventLog = ref<string[]>([]);
+const manifest = ref<any | null>(null);
+const currentTemplate = ref<any | null>(null);
 
-const defaultTemplate = {
-  id: 'tmpl_test',
-  version: '1.0.0',
-  title: 'Test template',
-  pdfHash: null,
-  pages: [{ width: 612, height: 792 }],
-  fields: [
-    {
-      id: 'field_ne4yr8o',
-      type: 'signature',
-      page: 0,
-      x: 0.5830269607843137,
-      y: 0.5196890782828283,
-      width: 0.3728562091503268,
-      height: 0.05243838383838384,
-      required: false,
-      label: 'signature',
-      defaultValue: null,
-      meta: {},
-      createdAt: '2026-04-23T14:30:31.610Z',
-    },
-  ],
-  meta: {},
-  createdAt: '2026-04-23T04:46:22.136Z',
-  updatedAt: '2026-04-23T14:41:35.599Z',
-};
-
-const template = ref<any>(defaultTemplate);
-const mode = ref<'template' | 'sign'>('template');
-const lastManifest = ref<any | null>(null);
-
-// signer controls
-const signerName = ref('Demo User');
-const signerEmail = ref('demo@example.com');
-const signerRole = ref('');
-const signerMode = ref<'standard' | 'integrity'>('standard');
-const embedPdfHash = ref(false);
-const signerReadonly = ref(false);
-const expectedTemplateHash = ref('');
-const expectedPdfHash = ref('');
-
-// template JSON editor
-const templateJsonText = ref(JSON.stringify(template.value, null, 2));
-const templateJsonError = ref<string | null>(null);
-
-watch(template, (t) => {
-  templateJsonText.value = JSON.stringify(t, null, 2);
-});
-
-function loadDefault() {
-  template.value = JSON.parse(JSON.stringify(defaultTemplate));
+function loadSample() {
+  pdfUrl.value = '/sample/sample.pdf';
 }
 
-function applyTemplateJson() {
-  try {
-    const parsed = JSON.parse(templateJsonText.value);
-    template.value = parsed;
-    templateJsonError.value = null;
-  } catch (e: any) {
-    templateJsonError.value = e.message || String(e);
+// provide global demo values so pages can use them
+provide('pdfUrl', pdfUrl);
+provide('eventLog', eventLog);
+provide('manifest', manifest);
+provide('currentTemplate', currentTemplate);
+
+async function handleDrop(e: DragEvent) {
+  const file = e.dataTransfer?.files?.[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    alert('Please drop a PDF file');
+    return;
   }
-}
-
-function resetTemplateJson() {
-  templateJsonText.value = JSON.stringify(template.value, null, 2);
-  templateJsonError.value = null;
-}
-
-function onFinalized(payload: any) {
-  lastManifest.value = payload.manifest;
-  // also offer download already handled by Signer; we can show a message
-  console.log('Finalized', payload);
-}
-
-// expose functions/values for template mode buttons
-function applyTemplateJsonSafe() {
-  applyTemplateJson();
+  // create an object URL for the preview
+  const url = URL.createObjectURL(file);
+  pdfUrl.value = url;
 }
 </script>
 
 <style scoped>
+@import './styles.css';
 .demo-root {
-  max-width: 1200px;
   margin: 18px auto;
-  padding: 12px;
-  background: #fafafa;
+  background: var(--color-bg-app, #fafafa);
   border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-md, 0 6px 18px rgba(0, 0, 0, 0.06));
 }
 .demo-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  margin-top: -24px;
+  padding-bottom: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  background: white;
 }
-.tabs {
-  display: flex;
-  gap: 8px;
-}
-.tabs button {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: #fff;
-  cursor: pointer;
-}
-.tabs button.active {
-  background: #007acc;
-  color: #fff;
-  border-color: rgba(0, 0, 0, 0.08);
-}
-.demo-grid {
-  display: grid;
-  grid-template-columns: 280px 1fr 320px;
-  gap: 18px;
-  margin-top: 12px;
-}
-.demo-setup,
-.demo-manifest {
-  background: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-}
-.demo-render {
-  background: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  min-height: 560px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-}
-.demo-setup label {
-  display: block;
-  margin-top: 8px;
-  font-size: 13px;
-  color: #333;
-}
-.demo-setup input,
-.demo-setup textarea,
-.demo-setup select {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  margin-top: 6px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-.demo-setup textarea {
-  font-family: monospace;
-  font-size: 12px;
-}
-.component-wrap {
-  height: 100%;
-}
-.err {
-  color: #a00;
-  margin-top: 6px;
-  font-size: 13px;
-}
-.block {
-  margin-top: 8px;
-}
-.chip {
-  display: inline-block;
-  padding: 6px 10px;
-  background: #eef6ff;
-  border-radius: 999px;
-  color: #036;
+.nav a {
+  margin-left: 12px;
+  color: var(--color-action-secondary, #4381c1);
   font-weight: 600;
+  text-decoration: none;
 }
-.row {
+.logo-group {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  align-items: center;
 }
-.row button {
-  padding: 8px 10px;
+.demo-main {
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  gap: 16px;
+  padding: 16px;
+}
+.demo-sidebar,
+.demo-inspect {
+  background: var(--color-bg-surface, #fff);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.06));
+}
+.demo-content {
+  min-height: 640px;
+}
+.log,
+.manifest {
+  max-height: 320px;
+  overflow: auto;
+  font-family: monospace;
+  font-size: 13px;
+}
+.muted {
+  color: var(--color-text-muted, rgba(0, 0, 0, 0.56));
 }
 </style>

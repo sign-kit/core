@@ -64,13 +64,14 @@ import { usePdfjs } from '../../composables/usePdfjs';
 import { useTemplate } from '../../composables/useTemplate';
 import { pixelsToNormalized, normalizedToPixels } from '../../utils/coord';
 
+// v-model: template (use defineModel for two-way binding)
+const model = defineModel<Template | null>();
+
 const props = defineProps<{
-  modelValue?: Template | null;
   pdf?: File | ArrayBuffer | string | null;
   initialZoom?: number;
 }>();
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Template | null): void;
   (e: 'field-added', field: Field): void;
   (e: 'field-updated', field: Field): void;
   (e: 'field-removed', id: string): void;
@@ -164,8 +165,43 @@ function fieldsOnPage(page: number) {
 
 function onDragStart(ev: DragEvent, type: string) {
   try {
-    ev.dataTransfer?.setData('text/plain', type);
-    ev.dataTransfer!.effectAllowed = 'copy';
+    const dt = ev.dataTransfer;
+    if (dt) {
+      dt.setData('text/plain', type);
+      dt.effectAllowed = 'copy';
+
+      // create a visual drag preview that matches the FieldBox appearance
+      try {
+        const def = defaultSizes[type] || { w: 0.18, h: 0.05 };
+        // base page width fallback
+        const basePage = pageSizes.value && pageSizes.value[0] ? pageSizes.value[0].width : 600;
+        const previewW = Math.max(48, Math.floor(def.w * basePage * (scale.value || 1)));
+        const previewH = Math.max(28, Math.floor(def.h * basePage * (scale.value || 1)));
+        const preview = document.createElement('div');
+        preview.className = 'bank-drag-preview';
+        preview.style.width = previewW + 'px';
+        preview.style.height = previewH + 'px';
+        preview.style.position = 'absolute';
+        preview.style.left = '-9999px';
+        preview.style.top = '0px';
+        // inner structure to match FieldBox: label, delete bubble, handle
+        preview.innerHTML = `
+          <div class="bank-preview-label">${type}</div>
+          <div class="bank-preview-delete">✕</div>
+          <div class="bank-preview-handle"></div>
+        `;
+        document.body.appendChild(preview);
+        dt.setDragImage(preview, Math.floor(previewW / 2), Math.floor(previewH / 2));
+        // remove preview after a short delay
+        setTimeout(() => {
+          try {
+            preview.remove();
+          } catch (e) {}
+        }, 0);
+      } catch (e) {
+        // ignore drag image failures
+      }
+    }
   } catch (e) {}
 }
 
@@ -182,11 +218,16 @@ function onDrop(ev: DragEvent, pageIndex: number) {
   const dropY = (ev as DragEvent).clientY - rect.top;
   const pageSize = pageSizes.value[pageIndex];
   if (!pageSize) return;
+  // compute preview size the same way the bank drag preview was created
+  const def = defaultSizes[type] || { w: 0.18, h: 0.05 };
+  const basePage =
+    pageSizes.value && pageSizes.value[0] ? pageSizes.value[0].width : pageSize.width;
+  const previewW = Math.max(48, Math.floor(def.w * basePage * (scale.value || 1)));
+  const previewH = Math.max(28, Math.floor(def.h * basePage * (scale.value || 1)));
   const pxW = pageSize.width * scale.value;
   const pxH = pageSize.height * scale.value;
-  const def = defaultSizes[type] || { w: 0.18, h: 0.05 };
-  const boxW = def.w * pxW;
-  const boxH = def.h * pxH;
+  const boxW = previewW;
+  const boxH = previewH;
   const norm = pixelsToNormalized(
     dropX - boxW / 2,
     dropY - boxH / 2,
@@ -206,7 +247,8 @@ function onDrop(ev: DragEvent, pageIndex: number) {
     meta: {},
   });
   emit('field-added', field);
-  emit('update:modelValue', exportTemplate());
+  // sync v-model with the new template
+  model.value = exportTemplate();
 }
 
 function onUpdateField(patch: Partial<Field> & { id: string }) {
@@ -219,13 +261,13 @@ function onUpdateField(patch: Partial<Field> & { id: string }) {
 function onDeleteField(id: string) {
   removeField(id);
   emit('field-removed', id);
-  emit('update:modelValue', exportTemplate());
+  model.value = exportTemplate();
 }
 
 function onFieldDragEnd(id: string) {
   const f = template.value.fields.find((x) => x.id === id)!;
   emit('field-updated', f);
-  emit('update:modelValue', exportTemplate());
+  model.value = exportTemplate();
 }
 
 function zoomIn() {
@@ -240,8 +282,9 @@ function exportTemplateAction() {
 }
 
 // watch incoming v-model
+// watch incoming v-model
 watch(
-  () => props.modelValue,
+  () => model.value,
   (v) => {
     if (v) {
       // replace local template - simple shallow assignment

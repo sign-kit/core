@@ -1,0 +1,73 @@
+<svg width="1600" height="500" viewBox="0 0 1600 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="500" fill="transparent"/>
+
+  <!-- Icon -->
+  <g transform="translate(120,85)">
+    <!-- Page outline -->
+    <path
+      d="M40 20
+         C40 8.95 48.95 0 60 0
+         H190
+         L290 100
+         V300
+         C290 311.05 281.05 320 270 320
+         H60
+         C48.95 320 40 311.05 40 300
+         V20Z"
+      fill="white"
+      stroke="#061633"
+      stroke-width="18"
+      stroke-linejoin="round"
+    />
+
+    <!-- Fold -->
+    <path
+      d="M190 0 L290 100 H210
+         C198.95 100 190 91.05 190 80
+         V0Z"
+      fill="#4F4BFF"
+    />
+
+    <!-- Signature -->
+    <path
+      d="M92 230
+         C108 205 124 180 138 145
+         C138 185 145 215 164 215
+         C178 215 190 190 205 190
+         C220 190 226 218 242 218
+         C252 218 262 214 274 210"
+      stroke="#4F4BFF"
+      stroke-width="18"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+
+    <!-- Bottom line -->
+    <line
+      x1="88" y1="268" x2="240" y2="268"
+      stroke="#4F4BFF"
+      stroke-width="12"
+      stroke-linecap="round"
+    />
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(560,110)">
+    <text
+      x="0" y="190"
+      font-family="Inter, Arial, Helvetica, sans-serif"
+      font-size="170"
+      font-weight="700"
+      letter-spacing="-6"
+      fill="#061633">signkit</text>
+
+    <text
+      x="760" y="190"
+      font-family="Inter, Arial, Helvetica, sans-serif"
+      font-size="170"
+      font-weight="700"
+      letter-spacing="-6"
+      fill="#4F4BFF">.dev</text>
+  </g>
+</svg>

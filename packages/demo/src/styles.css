@@ -1,0 +1,41 @@
+/* Demo style variables from STYLEGUIDE.MD (trimmed) */
+:root{
+  --color-jet-black:#292F36;
+  --color-strong-cyan:#4ECDC4;
+  --color-bright-snow:#F8F7F9;
+  --color-grapefruit-pink:#FF6B6B;
+  --color-steel-blue:#4381C1;
+  --color-text-primary:var(--color-jet-black);
+  --color-text-secondary:rgba(41,47,54,0.72);
+  --color-text-muted:rgba(41,47,54,0.56);
+  --color-bg-app:var(--color-bright-snow);
+  --color-bg-surface:#FFFFFF;
+  --color-border-default:rgba(41,47,54,0.12);
+  --color-action-primary:var(--color-strong-cyan);
+  --color-action-secondary:var(--color-steel-blue);
+  --color-action-danger:var(--color-grapefruit-pink);
+  --color-signature-accent:var(--color-strong-cyan);
+  --color-integrity-pass:var(--color-strong-cyan);
+  --color-integrity-fail:var(--color-grapefruit-pink);
+  --radius-sm:6px;
+  --radius-md:10px;
+  --space-2:8px;
+  --space-4:16px;
+  --shadow-md:0 6px 18px rgba(41,47,54,0.10);
+}
+
+body{font-family:var(--font-family-sans, Inter, system-ui);margin:0;background:var(--color-bg-app)}
+input,textarea,select{font-family:inherit}
+button{background:var(--color-action-primary);color:#fff;border:none;padding:8px 10px;border-radius:6px;cursor:pointer}
+button.secondary{background:var(--color-action-secondary)}
+
+/* small responsive tweaks */
+@media(max-width:900px){.demo-main{grid-template-columns:1fr;}.demo-inspect{order:3}.demo-sidebar{order:1}.demo-content{order:2}}
+
+.cardify{
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-4);
+}

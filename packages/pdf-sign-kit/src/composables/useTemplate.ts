@@ -69,7 +69,9 @@ export function useTemplate(initial?: Template | null) {
   }
 
   function exportTemplate() {
-    return JSON.parse(JSON.stringify(template.value)) as Template;
+    const j = JSON.parse(JSON.stringify(template.value)) as Template;
+
+    return j;
   }
 
   return { template, setPages, addField, updateField, removeField, exportTemplate };

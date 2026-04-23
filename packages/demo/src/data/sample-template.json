@@ -1,0 +1,20 @@
+{
+  "id": "tmpl_demo",
+  "version": "1.0.0",
+  "title": "Demo Template",
+  "pages": [{ "width": 612, "height": 792 }],
+  "fields": [
+    {
+      "id": "sig1",
+      "type": "signature",
+      "page": 0,
+      "x": 0.6,
+      "y": 0.6,
+      "width": 0.35,
+      "height": 0.08,
+      "label": "Signature",
+      "meta": {}
+    }
+  ],
+  "createdAt": "2026-04-23T00:00:00.000Z"
+}
