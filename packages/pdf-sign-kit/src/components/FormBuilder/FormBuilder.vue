@@ -295,9 +295,12 @@ watch(
       // if a dateLocale prop override is provided, apply it to the template meta
       if (props.dateLocale) {
         template.value.meta = template.value.meta || {};
-        (template.value.meta as any).dateLocale = props.dateLocale;
-        // propagate back to model
-        model.value = exportTemplate();
+        const current = (template.value.meta as any).dateLocale;
+        if (current !== props.dateLocale) {
+          (template.value.meta as any).dateLocale = props.dateLocale;
+          // propagate back to model only when a real change occurred
+          model.value = exportTemplate();
+        }
       }
     }
   },
@@ -309,8 +312,11 @@ watch(
   (loc) => {
     if (!loc) return;
     template.value.meta = template.value.meta || {};
-    (template.value.meta as any).dateLocale = loc;
-    model.value = exportTemplate();
+    const cur = (template.value.meta as any).dateLocale;
+    if (cur !== loc) {
+      (template.value.meta as any).dateLocale = loc;
+      model.value = exportTemplate();
+    }
   },
 );
 

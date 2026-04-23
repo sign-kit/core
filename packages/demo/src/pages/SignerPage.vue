@@ -1,18 +1,20 @@
 <template>
   <div class="page">
     <h2>Signer</h2>
-    <div class="controls">
-      <label>Signer name <input v-model="signer.name" /></label>
-      <label>Signer email <input v-model="signer.email" /></label>
-      <label
-        >Mode
-        <select v-model="mode">
-          <option value="standard">standard</option>
-          <option value="integrity">integrity</option>
-        </select>
-      </label>
-      <label><input type="checkbox" v-model="embedPdfHash" /> Embed pdfHash</label>
-    </div>
+    <teleport to="#left-panel-option">
+      <div class="controls">
+        <label>Signer name <input v-model="signer.name" /></label>
+        <label>Signer email <input v-model="signer.email" /></label>
+        <label
+          >Mode
+          <select v-model="mode">
+            <option value="standard">standard</option>
+            <option value="integrity">integrity</option>
+          </select>
+        </label>
+        <label><input type="checkbox" v-model="embedPdfHash" /> Embed pdfHash</label>
+      </div>
+    </teleport>
 
     <div class="signer-wrap">
       <Signer
@@ -101,13 +103,13 @@ function onIntegrityVerification(payload: any) {
 }
 .controls {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
   margin-bottom: 12px;
 }
 .signer-wrap {
   border-radius: 8px;
-  background: var(--color-bg-surface, #fff);
+  background: var(--color-bg-surface, #f6f7fb);
   padding: 12px;
 }
 </style>

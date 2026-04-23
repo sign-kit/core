@@ -15,7 +15,7 @@
     <main class="demo-main">
       <aside class="demo-sidebar" @dragover.prevent @drop.prevent="handleDrop">
         <div class="cardify">
-          <h4>Sample PDF</h4>
+          <h4>PDF</h4>
           <input v-model="pdfUrl" />
           <div style="margin-top: 12px">
             <button @click="loadSample">Load sample.pdf</button>
@@ -24,7 +24,11 @@
             Or drag & drop a PDF onto this panel
           </div>
         </div>
-        <div id="left-panel-option"></div>
+        <div class="cardify" style="margin-top: 10px">
+          <h4>Component props</h4>
+
+          <div id="left-panel-option"></div>
+        </div>
       </aside>
 
       <section class="demo-content">

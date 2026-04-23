@@ -22,6 +22,8 @@
   background: #f6f7fb;
   padding: 16px;
   flex: 1;
+  max-width: 100%;
+  overflow: auto;
 }
 .pdf-builder__content { display: flex; gap: 16px; align-items: flex-start; }
 .pdf-builder__bank { width: 180px; padding: 12px; background: #fff; border-left: 1px solid #eee; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }

@@ -123,17 +123,15 @@ export interface Manifest {
     valuesHash?: string;
     ok: boolean;
     verdict?: 'pass' | 'warn' | 'fail';
-    details?:
-      | {
-          checks?: Array<{
-            name: string;
-            result: 'match' | 'mismatch';
-            expected?: string;
-            actual?: string;
-            details?: Record<string, unknown>;
-          }>;
-        }
-      | Record<string, unknown>;
+    details?: {
+      checks?: Array<{
+        name: string;
+        result: 'match' | 'mismatch';
+        expected?: string;
+        actual?: string;
+        details?: Record<string, unknown>;
+      }>;
+    } | Record<string, unknown>;
   };
   // session-level canonical hash combining pdfHash, templateHash and valuesHash
   sessionHash?: string;
