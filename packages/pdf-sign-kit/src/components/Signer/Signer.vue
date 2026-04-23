@@ -73,14 +73,41 @@
       </div>
     </div>
 
-    <!-- modal for choosing input method (draw/type/clear) -->
+    <!-- modal for choosing input method (tabs: Type / Draw) -->
     <div v-if="activeChoiceField" class="modal-backdrop">
       <div class="modal">
         <h3>{{ activeChoiceField.label || activeChoiceField.id }}</h3>
-        <p>Choose input method</p>
+        <div class="choice-tabs" style="display: flex; gap: 8px; margin-bottom: 8px">
+          <button
+            :class="{ active: activeChoiceMode === 'type' }"
+            @click="activeChoiceMode = 'type'"
+          >
+            Type
+          </button>
+          <button
+            :class="{ active: activeChoiceMode === 'draw' }"
+            @click="activeChoiceMode = 'draw'"
+          >
+            Draw
+          </button>
+        </div>
+        <div class="choice-body">
+          <div v-if="activeChoiceMode === 'type'">
+            <input v-model="typedText" placeholder="Type your name" />
+            <div class="modal-preview">
+              <canvas ref="typedCanvas" :width="typedCanvasW" :height="typedCanvasH"></canvas>
+            </div>
+          </div>
+          <div v-else>
+            <SignaturePad
+              ref="padRef"
+              :width="Math.max(300, padWidth)"
+              :height="Math.max(120, padHeight)"
+            />
+          </div>
+        </div>
         <div class="modal-actions">
-          <button @click="choiceDraw">Draw</button>
-          <button class="primary" @click="choiceType">Type</button>
+          <button class="primary" @click="saveChoice">Save</button>
           <button v-if="values[activeChoiceField.id]" @click="choiceClear">Clear</button>
           <button class="secondary" @click="closeChoice">Cancel</button>
         </div>
@@ -225,6 +252,8 @@ const padHeight = ref(120);
 
 // choice modal (open when user clicks the signature box)
 const activeChoiceField = ref<Field | null>(null);
+// which tab is active in the choice modal: 'type' or 'draw'
+const activeChoiceMode = ref<'type' | 'draw'>('type');
 
 function openPad(f: Field) {
   activePadField.value = f;
@@ -251,25 +280,40 @@ function savePad() {
 
 function openChoice(f: Field) {
   if (isFieldReadonly(f)) return;
-  // default to typed input to make typing signatures the primary flow
-  openTyped(f);
+  // present choice modal so users can choose Draw or Type; default to Type
+  activeChoiceField.value = f;
+  activeChoiceMode.value = 'type';
 }
 
 function closeChoice() {
   activeChoiceField.value = null;
 }
 
-function choiceDraw() {
+function saveChoice() {
   if (!activeChoiceField.value) return;
-  // open pad for this field
-  openPad(activeChoiceField.value);
+  if (activeChoiceMode.value === 'type') {
+    // ensure typed field is set as active before saving
+    activeTypedField.value = activeChoiceField.value;
+    saveTyped();
+  } else {
+    // open/save pad for this field
+    activePadField.value = activeChoiceField.value;
+    savePad();
+  }
   activeChoiceField.value = null;
 }
 
-function choiceType() {
-  if (!activeChoiceField.value) return;
-  openTyped(activeChoiceField.value);
-  activeChoiceField.value = null;
+// when switching modes, seed typed text or clear pad accordingly
+watch(() => activeChoiceMode.value, setupChoice);
+watch(() => activeChoiceField.value, setupChoice);
+
+function setupChoice() {
+  if (activeChoiceMode.value === 'type') {
+    typedText.value = props.signer?.name ?? '';
+    nextTick(() => renderTypedPreview());
+  } else {
+    nextTick(() => padRef.value?.clear?.());
+  }
 }
 
 function choiceClear() {
@@ -308,10 +352,25 @@ function renderTypedPreview() {
   // clear to transparent so saved image has no white background
   ctx.clearRect(0, 0, c.width, c.height);
   ctx.fillStyle = '#000';
-  const fontSize = Math.max(20, Math.floor(c.height * 0.5));
-  ctx.font = `${fontSize}px Pacifico, cursive, serif`;
-  ctx.textBaseline = 'middle';
-  ctx.fillText(typedText.value || '', 10, c.height / 2);
+  const padding = 8;
+  const family = 'Pacifico, cursive, serif';
+  // start with a font size based on canvas height, then shrink to fit width if needed
+  let fontSize = Math.max(20, Math.floor((c.height - padding * 2) * 0.6));
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = `${fontSize}px ${family}`;
+  const text = typedText.value || '';
+  let metrics = ctx.measureText(text);
+  const availW = Math.max(10, c.width - padding * 2);
+  if (metrics.width > availW && metrics.width > 0) {
+    const scale = availW / metrics.width;
+    fontSize = Math.max(12, Math.floor(fontSize * scale));
+    ctx.font = `${fontSize}px ${family}`;
+    metrics = ctx.measureText(text);
+  }
+  const ascent = (metrics.actualBoundingBoxAscent as number) || fontSize * 0.75;
+  const descent = (metrics.actualBoundingBoxDescent as number) || fontSize * 0.25;
+  const baselineY = (c.height + ascent - descent) / 2;
+  ctx.fillText(text, padding, baselineY);
 }
 
 // update typed preview as user types
@@ -569,6 +628,36 @@ const fieldsOnPageExport = fieldsOnPage;
   background: rgb(var(--primary-rgb, 11, 118, 209));
   color: #fff;
   border: none;
+}
+.choice-tabs button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
+  cursor: pointer;
+  color: #222;
+}
+.choice-tabs button.active {
+  background: rgb(var(--primary-rgb));
+  color: #fff;
+  border-color: rgba(var(--primary-rgb), 0.9);
+}
+.choice-body input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e6e6e6;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+.modal-preview {
+  margin-top: 8px;
+}
+.modal-preview canvas {
+  width: 100%;
+  height: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
 }
 .modal-actions button.secondary {
   background: transparent;

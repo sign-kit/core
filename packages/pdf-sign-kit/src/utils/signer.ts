@@ -92,7 +92,45 @@ export async function applyValuesToPdf(
       field.type === 'date' ||
       field.type === 'current_date'
     ) {
-      const text = String(raw);
+      // for date fields, allow formatting based on field.format or template.meta.dateLocale
+      let text = String(raw);
+      if (field.type === 'date' || field.type === 'current_date') {
+        try {
+          const dstr = String(raw);
+          // try parse YYYY-MM-DD safely (avoid timezone shift)
+          let dateObj: Date | null = null;
+          const ymd = dstr.split('T')[0];
+          const parts = ymd.split('-');
+          if (parts.length === 3) {
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            const dd = parseInt(parts[2], 10);
+            if (!Number.isNaN(y) && !Number.isNaN(m) && !Number.isNaN(dd)) {
+              dateObj = new Date(y, m - 1, dd);
+            }
+          }
+          if (!dateObj) dateObj = new Date(dstr);
+
+          // prefer explicit per-field format tokens (YYYY, MM, DD)
+          const df = (field as any).format as string | undefined;
+          if (df && /Y|M|D/.test(df) && dateObj) {
+            const Y = String(dateObj.getFullYear());
+            const MM = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const DD = String(dateObj.getDate()).padStart(2, '0');
+            text = df.replace(/YYYY/g, Y).replace(/MM/g, MM).replace(/DD/g, DD);
+          } else if (template && template.meta && (template.meta as any).dateLocale) {
+            try {
+              text = new Intl.DateTimeFormat((template.meta as any).dateLocale).format(dateObj!);
+            } catch (e) {
+              text = dateObj!.toLocaleDateString();
+            }
+          } else if (dateObj) {
+            text = dateObj.toLocaleDateString();
+          }
+        } catch (e) {
+          text = String(raw);
+        }
+      }
       const fontSize = Math.max(8, Math.min(14, h * 0.6));
       page.drawText(text, {
         x,

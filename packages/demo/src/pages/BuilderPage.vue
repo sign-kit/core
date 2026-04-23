@@ -2,9 +2,18 @@
   <div class="page">
     <h2>Builder</h2>
     <p>Load a PDF and edit template fields. Export/Import template JSON.</p>
+    <teleport to="#left-panel-option">
+      <div class="row" style="margin-bottom: 8px; align-items: center">
+        <label style="font-weight: 600; margin-right: 8px">Date locale:</label>
+        <select v-model="dateLocale">
+          <option value="">(browser default)</option>
+          <option v-for="loc in localeOptions" :key="loc" :value="loc">{{ loc }}</option>
+        </select>
+      </div>
+    </teleport>
     <div class="builder-grid">
       <div class="left cardify">
-        <FormBuilder :pdf="pdfUrlValue" v-model="template" />
+        <FormBuilder :pdf="pdfUrlValue" v-model="template" :dateLocale="dateLocale" />
       </div>
     </div>
     <div class="cardify">
@@ -19,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref, watch } from 'vue';
+import { inject, ref, watch, computed } from 'vue';
 import { FormBuilder } from '../../../pdf-sign-kit/src';
 
 const pdfUrl = inject('pdfUrl') as any;
@@ -33,6 +42,69 @@ const template = ref<any>({
   createdAt: new Date().toISOString(),
 });
 const templateJson = ref(JSON.stringify(template.value, null, 2));
+const dateLocale = ref(
+  (template.value && template.value.meta && template.value.meta.dateLocale) ||
+    (navigator && navigator.language) ||
+    '',
+);
+
+const commonLocales = [
+  'en-US',
+  'en-GB',
+  'en-CA',
+  'en-AU',
+  'es-ES',
+  'es-MX',
+  'fr-FR',
+  'fr-CA',
+  'de-DE',
+  'it-IT',
+  'pt-BR',
+  'pt-PT',
+  'nl-NL',
+  'sv-SE',
+  'no-NO',
+  'da-DK',
+  'fi-FI',
+  'pl-PL',
+  'cs-CZ',
+  'hu-HU',
+  'ro-RO',
+  'sk-SK',
+  'sl-SI',
+  'hr-HR',
+  'tr-TR',
+  'el-GR',
+  'ru-RU',
+  'uk-UA',
+  'he-IL',
+  'ar-SA',
+  'ar-EG',
+  'hi-IN',
+  'bn-BD',
+  'bn-IN',
+  'pa-IN',
+  'ta-IN',
+  'th-TH',
+  'vi-VN',
+  'id-ID',
+  'ms-MY',
+  'zh-CN',
+  'zh-TW',
+  'zh-HK',
+  'ja-JP',
+  'ko-KR',
+];
+
+const localeOptions = computed(() => {
+  const list: string[] = [];
+  try {
+    const nav = (navigator && (navigator.languages || [navigator.language])) || [];
+    for (const l of nav) if (l && !list.includes(l)) list.push(l);
+  } catch (e) {}
+  for (const l of commonLocales) if (!list.includes(l)) list.push(l);
+  return list;
+});
 
 // if the demo provides a global currentTemplate ref, update it when the builder changes
 const currentTemplate = inject('currentTemplate') as any;
@@ -52,6 +124,15 @@ watch(
   },
   { deep: true },
 );
+
+watch(dateLocale, (d) => {
+  try {
+    if (!template.value.meta) template.value.meta = {};
+    (template.value.meta as any).dateLocale = d;
+    templateJson.value = JSON.stringify(template.value, null, 2);
+    if (currentTemplate && 'value' in currentTemplate) currentTemplate.value = template.value;
+  } catch (e) {}
+});
 
 function exportTemplate() {
   const blob = new Blob([templateJson.value], { type: 'application/json' });

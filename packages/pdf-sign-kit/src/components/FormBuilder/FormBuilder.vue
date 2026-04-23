@@ -70,6 +70,8 @@ const model = defineModel<Template | null>();
 const props = defineProps<{
   pdf?: File | ArrayBuffer | string | null;
   initialZoom?: number;
+  // optional override for date locale used by template (e.g. 'en-US')
+  dateLocale?: string | null;
 }>();
 const emit = defineEmits<{
   (e: 'field-added', field: Field): void;
@@ -85,7 +87,7 @@ const pdfSource = ref(props.pdf ?? null);
 const { pdfDoc, numPages, pageSizes, loading, renderPage } = usePdfjs(pdfSource as any);
 
 const { template, setPages, addField, updateField, removeField, exportTemplate } = useTemplate(
-  props.modelValue ?? null,
+  model.value ?? null,
 );
 
 const scale = ref(props.initialZoom ?? 1);
@@ -278,7 +280,8 @@ function zoomOut() {
 }
 
 function exportTemplateAction() {
-  emit('update:modelValue', exportTemplate());
+  // sync v-model with exported template
+  model.value = exportTemplate();
 }
 
 // watch incoming v-model
@@ -289,7 +292,25 @@ watch(
     if (v) {
       // replace local template - simple shallow assignment
       template.value = v as Template;
+      // if a dateLocale prop override is provided, apply it to the template meta
+      if (props.dateLocale) {
+        template.value.meta = template.value.meta || {};
+        (template.value.meta as any).dateLocale = props.dateLocale;
+        // propagate back to model
+        model.value = exportTemplate();
+      }
     }
+  },
+);
+
+// if the consumer provided an explicit dateLocale prop, keep the model meta in sync
+watch(
+  () => props.dateLocale,
+  (loc) => {
+    if (!loc) return;
+    template.value.meta = template.value.meta || {};
+    (template.value.meta as any).dateLocale = loc;
+    model.value = exportTemplate();
   },
 );
 

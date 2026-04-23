@@ -14,7 +14,11 @@ export function useTemplate(initial?: Template | null) {
       pdfHash: null,
       pages: [],
       fields: [],
-      meta: {},
+      // store creation locale so date formatting can default to the creator's browser
+      meta:
+        typeof navigator !== 'undefined' && (navigator as any).language
+          ? { dateLocale: (navigator as any).language }
+          : {},
       createdAt: new Date().toISOString(),
     },
   );

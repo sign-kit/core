@@ -14,14 +14,17 @@
 
     <main class="demo-main">
       <aside class="demo-sidebar" @dragover.prevent @drop.prevent="handleDrop">
-        <h4>Sample PDF</h4>
-        <input v-model="pdfUrl" />
-        <div style="margin-top: 12px">
-          <button @click="loadSample">Load sample.pdf</button>
+        <div class="cardify">
+          <h4>Sample PDF</h4>
+          <input v-model="pdfUrl" />
+          <div style="margin-top: 12px">
+            <button @click="loadSample">Load sample.pdf</button>
+          </div>
+          <div style="margin-top: 8px; font-size: 12px; color: var(--color-text-muted)">
+            Or drag & drop a PDF onto this panel
+          </div>
         </div>
-        <div style="margin-top: 8px; font-size: 12px; color: var(--color-text-muted)">
-          Or drag & drop a PDF onto this panel
-        </div>
+        <div id="left-panel-option"></div>
       </aside>
 
       <section class="demo-content">
