@@ -49,8 +49,13 @@ export function usePdfjs(source: Ref<File | ArrayBuffer | string | null | undefi
 
       const params: any = {};
       if (typeof src === 'string') params.url = src;
-      else if (src instanceof ArrayBuffer) params.data = src;
-      else if (src instanceof File) params.data = await src.arrayBuffer();
+      else if (src instanceof ArrayBuffer) {
+        // pdfjs may transfer an ArrayBuffer to its worker which detaches it on the
+        // main thread. Pass a copy to pdfjs so the original buffer remains usable
+        // for other consumers (e.g. signing). ArrayBuffer.slice creates a new
+        // detached-safe copy.
+        params.data = src.slice ? src.slice(0) : src;
+      } else if (src instanceof File) params.data = await src.arrayBuffer();
       else params.data = src;
 
       loadingTask = pdfjs.getDocument(params);

@@ -20,6 +20,7 @@ export async function applyValuesToPdf(
   pdfBytes: ArrayBuffer,
   template: Template,
   values: Record<string, string | boolean | null>,
+  options?: { pdfHash?: string; embedPdfHash?: boolean },
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const pages = pdfDoc.getPages();
@@ -70,7 +71,10 @@ export async function applyValuesToPdf(
         const scale = Math.min(scaleX, scaleY);
         const drawW = dims.width * scale;
         const drawH = dims.height * scale;
-        page.drawImage(image, { x: x, y: y + (h - drawH) / 2, width: drawW, height: drawH });
+        // center horizontally and vertically inside the field
+        const drawX = x + (w - drawW) / 2;
+        const drawY = y + (h - drawH) / 2;
+        page.drawImage(image, { x: drawX, y: drawY, width: drawW, height: drawH });
       } catch (e) {
         // ignore embed failures
       }
@@ -91,6 +95,23 @@ export async function applyValuesToPdf(
           color: rgb(0, 0, 0),
         });
       }
+    }
+  }
+
+  // Optionally embed the pdfHash as a small signature line on the last page
+  if (options?.embedPdfHash && options.pdfHash) {
+    try {
+      const lastPage = pages[pages.length - 1];
+      const sigText = `signature: ${options.pdfHash}`;
+      const fontSize = 8;
+      const textWidth = (helv as any).widthOfTextAtSize
+        ? (helv as any).widthOfTextAtSize(sigText, fontSize)
+        : sigText.length * fontSize * 0.5;
+      const x = Math.max(10, (lastPage.getWidth() - textWidth) / 2);
+      const y = 10; // 10 units from bottom
+      lastPage.drawText(sigText, { x, y, size: fontSize, font: helv, color: rgb(0.2, 0.2, 0.2) });
+    } catch (e) {
+      // ignore any failures embedding the hash
     }
   }
 

@@ -33,14 +33,22 @@
               </template>
 
               <template v-else-if="f.type === 'signature' || f.type === 'initials'">
-                  <div
-                    class="signature-field"
-                    :class="{ empty: !values[f.id] }"
-                    @click.stop="openChoice(f)"
-                    role="button"
-                  >
+                <div
+                  class="signature-field"
+                  :class="{ empty: !values[f.id] }"
+                  @click.stop="openChoice(f)"
+                  role="button"
+                >
                   <img v-if="values[f.id]" :src="values[f.id] as string" class="sig-preview" />
-                  <div v-else class="empty-placeholder">{{ f.type === 'initials' ? 'No initials' : f.type === 'signature' ? 'No signature' : 'No value' }}</div>
+                  <div v-else class="empty-placeholder">
+                    {{
+                      f.type === 'initials'
+                        ? 'No initials'
+                        : f.type === 'signature'
+                          ? 'No signature'
+                          : 'No value'
+                    }}
+                  </div>
                 </div>
               </template>
             </div>
@@ -117,6 +125,7 @@ const props = defineProps<{
   mode?: 'standard' | 'integrity';
   expected?: { templateHash?: string; pdfHash?: string } | null;
   readonly?: boolean;
+  embedPdfHash?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -170,11 +179,7 @@ onMounted(() => {
   ensurePdfBytes();
 });
 
-let signerManager = useSignerManager(
-  props.template,
-  originalPdfBytes.value,
-  props.signer ?? null,
-);
+let signerManager = useSignerManager(props.template, originalPdfBytes.value, props.signer ?? null);
 let values = signerManager.values as any;
 let errors = signerManager.errors as any;
 
@@ -323,17 +328,18 @@ async function handleFinalize() {
       mode,
       expected: props.expected ?? undefined,
       signerInfo: props.signer,
+      embedPdfHash: props.embedPdfHash ?? false,
     });
     // copy bytes into a fresh buffer to avoid errors from detached ArrayBuffers
     let pdfCopy: Uint8Array;
     if (signedPdfBytes instanceof Uint8Array) pdfCopy = signedPdfBytes.slice();
     else pdfCopy = new Uint8Array(signedPdfBytes).slice();
     const blob = new Blob([pdfCopy], { type: 'application/pdf' });
-      emit('finalized', {
-        values: Object.entries(values.value).map(([k, v]) => ({ fieldId: k, value: v })),
-        signedPdf: blob,
-        manifest,
-      });
+    emit('finalized', {
+      values: Object.entries(values.value).map(([k, v]) => ({ fieldId: k, value: v })),
+      signedPdf: blob,
+      manifest,
+    });
     // also trigger download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -366,7 +372,6 @@ onMounted(() => computeIntegrity());
 function setValue(fieldId: string, v: any) {
   signerManager.setValue(fieldId, v as any);
 }
-
 
 // refs for pad/typed canvas
 const padRefAny = padRef;
@@ -502,20 +507,20 @@ const fieldsOnPageExport = fieldsOnPage;
 .modal-actions button {
   padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   background: #fff;
   cursor: pointer;
   font-weight: 600;
 }
 .modal-actions button.primary {
-  background: rgb(var(--primary-rgb, 11,118,209));
+  background: rgb(var(--primary-rgb, 11, 118, 209));
   color: #fff;
   border: none;
 }
 .modal-actions button.secondary {
   background: transparent;
   color: #333;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(0, 0, 0, 0.12);
 }
 .modal-actions button:hover {
   transform: translateY(-1px);

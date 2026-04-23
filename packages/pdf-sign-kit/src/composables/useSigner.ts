@@ -65,8 +65,9 @@ export function useSignerManager(
     mode?: 'standard' | 'integrity';
     expected?: { templateHash?: string; pdfHash?: string };
     signerInfo?: { id?: string; name?: string; email?: string };
+    embedPdfHash?: boolean;
   }) {
-    const { mode = 'standard', expected, signerInfo } = options || {};
+    const { mode = 'standard', expected, signerInfo, embedPdfHash = false } = options || {};
     // perform validation first
     const v = validate();
     if (!v.ok) throw { validation: v.errors };
@@ -93,7 +94,10 @@ export function useSignerManager(
 
     if (!originalPdfBytes) throw new Error('Original PDF bytes required for finalization');
 
-    const signedPdfBytes = await applyValuesToPdf(originalPdfBytes, template, values.value);
+    const signedPdfBytes = await applyValuesToPdf(originalPdfBytes, template, values.value, {
+      pdfHash: originalPdfHash,
+      embedPdfHash: embedPdfHash,
+    });
 
     const manifest: Manifest = {
       manifestId: `m-${Date.now()}`,
