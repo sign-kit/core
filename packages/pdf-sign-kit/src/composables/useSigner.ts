@@ -1,6 +1,12 @@
 import { ref, computed } from 'vue';
 import type { Template, Field, FieldValue, Manifest } from '../types';
-import { computeSha256, applyValuesToPdf, valuesToFieldArray } from '../utils/signer';
+import {
+  computeSha256,
+  applyValuesToPdf,
+  valuesToFieldArray,
+  canonicalizeTemplate,
+  computeValuesHash,
+} from '../utils/signer';
 
 export type SignerInfo = { id?: string; name?: string; email?: string; role?: string } | null;
 
@@ -63,18 +69,20 @@ export function useSignerManager(
 
   async function finalize(options?: {
     mode?: 'standard' | 'integrity';
-    expected?: { templateHash?: string; pdfHash?: string };
+    expected?: { templateHash?: string; pdfHash?: string; valuesHash?: string };
     signerInfo?: { id?: string; name?: string; email?: string };
     embedPdfHash?: boolean;
+    verificationMode?: 'disabled' | 'warn' | 'strict';
+    allowOverride?: boolean;
   }) {
     const { mode = 'standard', expected, signerInfo, embedPdfHash = false } = options || {};
     // perform validation first
     const v = validate();
     if (!v.ok) throw { validation: v.errors };
 
-    // compute template hash
-    const templateBuffer = new TextEncoder().encode(JSON.stringify(template));
-    const templateHash = await computeSha256(templateBuffer.buffer);
+    // compute template hash (canonicalized)
+    const canonical = canonicalizeTemplate(template);
+    const templateHash = await computeSha256(new TextEncoder().encode(canonical).buffer);
 
     // compute original pdf hash if available
     let originalPdfHash: string | undefined = undefined;
@@ -82,22 +90,58 @@ export function useSignerManager(
       originalPdfHash = await computeSha256(originalPdfBytes);
     }
 
-    // optional integrity check
+    // compute values hash
+    const valuesHash = await computeValuesHash(values.value);
+
+    // derive session hash
+    const sessionCanonical = JSON.stringify({ pdfHash: originalPdfHash, templateHash, valuesHash });
+    const sessionHash = await computeSha256(new TextEncoder().encode(sessionCanonical).buffer);
+
+    // integrity checks
+    const integrityDetails: Record<string, any> = { checks: [] };
     let integrityOk = true;
-    const integrityDetails: Record<string, unknown> = {};
-    if (mode === 'integrity' && expected) {
-      if (expected.templateHash && expected.templateHash !== templateHash) integrityOk = false;
-      if (expected.pdfHash && originalPdfHash && expected.pdfHash !== originalPdfHash)
-        integrityOk = false;
-      integrityDetails.expected = expected;
+    const vm = options?.verificationMode ?? (options?.mode === 'integrity' ? 'warn' : 'disabled');
+    const expected = options?.expected;
+    if (expected?.templateHash) {
+      const ok = expected.templateHash === templateHash;
+      integrityDetails.checks.push({
+        name: 'templateHash',
+        result: ok ? 'match' : 'mismatch',
+        expected: expected.templateHash,
+        actual: templateHash,
+      });
+      if (!ok) integrityOk = false;
+    }
+    if (expected?.pdfHash && originalPdfHash) {
+      const ok = expected.pdfHash === originalPdfHash;
+      integrityDetails.checks.push({
+        name: 'pdfHash',
+        result: ok ? 'match' : 'mismatch',
+        expected: expected.pdfHash,
+        actual: originalPdfHash,
+      });
+      if (!ok) integrityOk = false;
+    }
+    if (expected?.valuesHash) {
+      const ok = expected.valuesHash === valuesHash;
+      integrityDetails.checks.push({
+        name: 'valuesHash',
+        result: ok ? 'match' : 'mismatch',
+        expected: expected.valuesHash,
+        actual: valuesHash,
+      });
+      if (!ok) integrityOk = false;
     }
 
     if (!originalPdfBytes) throw new Error('Original PDF bytes required for finalization');
 
-    const signedPdfBytes = await applyValuesToPdf(originalPdfBytes, template, values.value, {
-      pdfHash: originalPdfHash,
-      embedPdfHash: embedPdfHash,
-    });
+    // if strict verification and disagreement, block
+    if (vm === 'strict' && !integrityOk) {
+      const err: any = new Error('Integrity check failed');
+      err.name = 'IntegrityError';
+      err.integrity = { ok: false, details: integrityDetails };
+      throw err;
+    }
 
     const manifest: Manifest = {
       manifestId: `m-${Date.now()}`,
@@ -112,10 +156,18 @@ export function useSignerManager(
       integrity: {
         templateHash,
         pdfHash: originalPdfHash ?? undefined,
+        valuesHash,
         ok: integrityOk,
         details: integrityDetails,
       },
-    };
+      sessionHash,
+    } as any;
+
+    const signedPdfBytes = await applyValuesToPdf(originalPdfBytes, template, values.value, {
+      pdfHash: originalPdfHash,
+      embedPdfHash: options?.embedPdfHash ?? false,
+      manifest: manifest,
+    });
 
     return { signedPdfBytes, manifest };
   }

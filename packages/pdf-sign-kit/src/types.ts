@@ -120,9 +120,23 @@ export interface Manifest {
   integrity?: {
     templateHash?: string;
     pdfHash?: string;
+    valuesHash?: string;
     ok: boolean;
-    details?: Record<string, unknown>;
+    verdict?: 'pass' | 'warn' | 'fail';
+    details?:
+      | {
+          checks?: Array<{
+            name: string;
+            result: 'match' | 'mismatch';
+            expected?: string;
+            actual?: string;
+            details?: Record<string, unknown>;
+          }>;
+        }
+      | Record<string, unknown>;
   };
+  // session-level canonical hash combining pdfHash, templateHash and valuesHash
+  sessionHash?: string;
 }
 
 // NOTE: 'current_date' field type must be created in the template but its value is resolved

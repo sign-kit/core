@@ -117,19 +117,24 @@ import type { Template, Field } from '../../types';
 import SignaturePad from './SignaturePad.vue';
 import { usePdfjs } from '../../composables/usePdfjs';
 import { useSignerManager } from '../../composables/useSigner';
+import { canonicalizeTemplate, computeSha256, computeValuesHash } from '../../utils/signer';
 
 const props = defineProps<{
   pdfSrc: string | ArrayBuffer | File | null;
   template: Template;
   signer?: { id?: string; name?: string; email?: string; role?: string } | null;
   mode?: 'standard' | 'integrity';
-  expected?: { templateHash?: string; pdfHash?: string } | null;
+  expectedHashes?: { templateHash?: string; pdfHash?: string; valuesHash?: string } | null;
+  verificationMode?: 'disabled' | 'warn' | 'strict';
+  allowOverride?: boolean;
   readonly?: boolean;
   embedPdfHash?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'finalized', payload: { values: any[]; signedPdf: Blob; manifest: any }): void;
+  (e: 'integrity-check', payload: any): void;
+  (e: 'integrity-verification', payload: any): void;
 }>();
 
 const mode = props.mode ?? 'standard';
@@ -326,10 +331,23 @@ async function handleFinalize() {
   try {
     const { signedPdfBytes, manifest } = await signerManager.finalize({
       mode,
-      expected: props.expected ?? undefined,
+      expected: props.expectedHashes ?? undefined,
       signerInfo: props.signer,
       embedPdfHash: props.embedPdfHash ?? false,
+      verificationMode: props.verificationMode ?? 'warn',
+      allowOverride: props.allowOverride ?? false,
     });
+    // if warn-mode and integrity failed and overrides not allowed, block
+    if (
+      props.verificationMode === 'warn' &&
+      manifest.integrity &&
+      manifest.integrity.ok === false &&
+      !props.allowOverride
+    ) {
+      alert('Integrity check reported mismatches; finalize blocked by configuration.');
+      return;
+    }
+
     // copy bytes into a fresh buffer to avoid errors from detached ArrayBuffers
     let pdfCopy: Uint8Array;
     if (signedPdfBytes instanceof Uint8Array) pdfCopy = signedPdfBytes.slice();
@@ -339,6 +357,11 @@ async function handleFinalize() {
       values: Object.entries(values.value).map(([k, v]) => ({ fieldId: k, value: v })),
       signedPdf: blob,
       manifest,
+    });
+    // emit integrity verification summary
+    emit('integrity-verification', {
+      integrity: manifest.integrity,
+      sessionHash: (manifest as any)?.meta?.sessionHash ?? (manifest as any)?.sessionHash,
     });
     // also trigger download
     const url = URL.createObjectURL(blob);
@@ -362,11 +385,41 @@ const integrity = ref<any>(null);
 // compute integrity check when possible
 async function computeIntegrity() {
   if (mode !== 'integrity') return;
-  // the useSignerManager handles checks at finalize time; here we just show basic placeholder
-  integrity.value = { ok: true };
+  try {
+    const tmplCanonical = canonicalizeTemplate(props.template);
+    const templateHash = await computeSha256(new TextEncoder().encode(tmplCanonical).buffer);
+    let pdfHash: string | undefined = undefined;
+    if (originalPdfBytes.value) pdfHash = await computeSha256(originalPdfBytes.value);
+    const valuesHash = await computeValuesHash(values.value || {});
+    const checks = [] as any[];
+    if (props.expectedHashes?.templateHash)
+      checks.push({
+        name: 'templateHash',
+        expected: props.expectedHashes.templateHash,
+        actual: templateHash,
+      });
+    if (props.expectedHashes?.pdfHash)
+      checks.push({ name: 'pdfHash', expected: props.expectedHashes.pdfHash, actual: pdfHash });
+    if (props.expectedHashes?.valuesHash)
+      checks.push({
+        name: 'valuesHash',
+        expected: props.expectedHashes.valuesHash,
+        actual: valuesHash,
+      });
+    const ok = checks.every((c) => !c.expected || c.expected === c.actual);
+    integrity.value = { ok, templateHash, pdfHash, valuesHash, checks };
+    emit('integrity-check', { ok, templateHash, pdfHash, valuesHash, checks });
+  } catch (e) {
+    integrity.value = { ok: false, error: String(e) };
+    emit('integrity-check', { ok: false, error: String(e) });
+  }
 }
 
 onMounted(() => computeIntegrity());
+// recompute integrity when inputs change
+watch([originalPdfBytes, () => props.template, () => props.expectedHashes], () => {
+  computeIntegrity();
+});
 
 // helpers
 function setValue(fieldId: string, v: any) {

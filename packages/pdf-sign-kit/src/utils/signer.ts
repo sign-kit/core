@@ -1,11 +1,55 @@
 import { Template, Field, FieldValue } from '../types';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
+// Compute SHA-256 and return base64url (no padding) string
 export async function computeSha256(buffer: ArrayBuffer): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  const hashBytes = new Uint8Array(hashBuffer);
+  let binary = '';
+  for (let i = 0; i < hashBytes.length; i++) binary += String.fromCharCode(hashBytes[i]);
+  const b64 = btoa(binary);
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
+
+// Stable stringify that sorts object keys deterministically.
+function stableStringify(v: any): string {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map((i) => stableStringify(i)).join(',') + ']';
+  const keys = Object.keys(v).sort();
+  return '{' + keys.map((k) => JSON.stringify(k) + ':' + stableStringify(v[k])).join(',') + '}';
+}
+
+export function canonicalizeTemplate(template: Template, options?: { exclude?: string[] }): string {
+  // create a shallow copy then remove volatile keys
+  const t: any = JSON.parse(JSON.stringify(template));
+  const exclude = new Set(options?.exclude || ['createdAt', 'updatedAt']);
+  for (const k of Object.keys(t)) if (exclude.has(k)) delete t[k];
+  // canonicalize fields: sort by id
+  if (Array.isArray(t.fields)) {
+    t.fields = t.fields.map((f: any) => {
+      const copy = JSON.parse(JSON.stringify(f));
+      // remove volatile field props
+      delete copy.createdAt;
+      delete copy.updatedAt;
+      return copy;
+    });
+    t.fields.sort((a: any, b: any) => String(a.id).localeCompare(String(b.id)));
+  }
+  return stableStringify(t);
+}
+
+export async function computeValuesHash(
+  values: Record<string, string | boolean | null>,
+): Promise<string> {
+  // canonicalize by sorting keys
+  const normalized: Record<string, any> = {};
+  const keys = Object.keys(values).sort();
+  for (const k of keys) normalized[k] = values[k] === null ? null : values[k];
+  const s = stableStringify(normalized);
+  return computeSha256(new TextEncoder().encode(s).buffer);
+}
+
+export const computePdfHash = computeSha256;
 
 function dataUrlToUint8Array(dataUrl: string): Uint8Array {
   const base64 = dataUrl.split(',')[1];
@@ -20,7 +64,7 @@ export async function applyValuesToPdf(
   pdfBytes: ArrayBuffer,
   template: Template,
   values: Record<string, string | boolean | null>,
-  options?: { pdfHash?: string; embedPdfHash?: boolean },
+  options?: { pdfHash?: string; embedPdfHash?: boolean; manifest?: any },
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const pages = pdfDoc.getPages();
@@ -112,6 +156,52 @@ export async function applyValuesToPdf(
       lastPage.drawText(sigText, { x, y, size: fontSize, font: helv, color: rgb(0.2, 0.2, 0.2) });
     } catch (e) {
       // ignore any failures embedding the hash
+    }
+  }
+
+  // If a manifest is provided, attempt to attach it and draw a small footer with sessionHash
+  if (options?.manifest) {
+    try {
+      const manifestStr =
+        typeof options.manifest === 'string'
+          ? options.manifest
+          : JSON.stringify(options.manifest, null, 2);
+      const manifestBytes = new TextEncoder().encode(manifestStr);
+      // pdf-lib may provide an attach API in some versions — try it if present
+      const anyDoc: any = pdfDoc as any;
+      if (typeof anyDoc.attach === 'function') {
+        try {
+          anyDoc.attach(manifestBytes, 'manifest.json', { mimeType: 'application/json' });
+        } catch (e) {
+          // ignore attach errors
+        }
+      }
+
+      // draw sessionHash footer if present
+      const sessionHash = options.manifest?.sessionHash;
+      if (sessionHash) {
+        try {
+          const lastPage = pages[pages.length - 1];
+          const sigText = `session: ${sessionHash}`;
+          const fontSize = 8;
+          const textWidth = (helv as any).widthOfTextAtSize
+            ? (helv as any).widthOfTextAtSize(sigText, fontSize)
+            : sigText.length * fontSize * 0.5;
+          const x = Math.max(10, (lastPage.getWidth() - textWidth) / 2);
+          const y = 22; // a bit above the pdfHash if present
+          lastPage.drawText(sigText, {
+            x,
+            y,
+            size: fontSize,
+            font: helv,
+            color: rgb(0.2, 0.2, 0.2),
+          });
+        } catch (e) {
+          // ignore draw errors
+        }
+      }
+    } catch (e) {
+      // ignore manifest attach errors
     }
   }
 
