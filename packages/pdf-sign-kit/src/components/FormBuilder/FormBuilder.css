@@ -1,0 +1,72 @@
+.pdf-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+.pdf-builder__toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pdf-builder__viewer {
+  position: relative;
+  overflow: auto;
+  background: #f6f7fb;
+  padding: 16px;
+  flex: 1;
+}
+.pdf-builder__content { display: flex; gap: 16px; align-items: flex-start; }
+.pdf-builder__bank { width: 180px; padding: 12px; background: #fff; border-left: 1px solid #eee; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.pdf-builder__bank h4 { margin: 0 0 8px 0; font-size: 14px; }
+.bank-list { display:flex; flex-direction:column; gap:8px; }
+.bank-item { padding: 8px 10px; border: 1px solid #ddd; border-radius:6px; cursor:grab; user-select:none; background: #fafafa; }
+.bank-item.active { background:#eaf6ff; border-color:#9fd2ff; }
+.bank-hint { margin-top:12px; font-size:12px; color:#666; }
+.pdf-page {
+  position: relative;
+  margin: 12px auto;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+.pdf-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* allow pointer events so clicks on the overlay register (used to add fields) */
+  pointer-events: auto;
+}
+
+.field-box {
+  position: absolute;
+  border: 2px dashed rgba(0,0,0,0.45);
+  background: rgba(255,255,255,0.6);
+  box-sizing: border-box;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.field-box .label {
+  padding: 4px 6px;
+  font-size: 12px;
+}
+.field-box, .field-box .label { user-select: none; -webkit-user-select: none; -ms-user-select: none; }
+.field-handle {
+  width: 10px;
+  height: 10px;
+  background: rgba(0,0,0,0.6);
+  position: absolute;
+}
+.field-handle.br { right: -5px; bottom: -5px; cursor: nwse-resize }
+.field-delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.field-box.dragging { box-shadow: 0 6px 20px rgba(0,0,0,0.12); transform-origin: 0 0; }

@@ -1,0 +1,4 @@
+# robots.txt for pdf-sign-kit demo site
+# Allow all user agents to crawl the demo. Update or remove for production.
+User-agent: *
+Disallow:
