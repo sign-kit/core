@@ -140,7 +140,7 @@ defineExpose(handle);
 .sig-canvas {
   display: block;
   touch-action: none;
-  background: #fff;
+  background: transparent;
   border: 1px solid #ddd;
   border-radius: 4px;
 }

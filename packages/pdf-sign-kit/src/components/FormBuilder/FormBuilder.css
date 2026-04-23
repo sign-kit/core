@@ -1,3 +1,10 @@
+:root{
+    --primary-color: #007bff;
+  --primary-rgb: 0,123,255;
+    --primary-color-light: #eaf6ff;
+    --border-color: #ddd;
+    --background-color: #f6f7fb;
+}
 .pdf-builder {
   display: flex;
   flex-direction: column;

@@ -1,18 +1,33 @@
 {
   "name": "@your-scope/pdf-sign-kit",
   "version": "0.1.0",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
+  "main": "dist/pdf-sign-kit.cjs.js",
+  "module": "dist/pdf-sign-kit.es.js",
   "types": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/pdf-sign-kit.es.js",
+      "require": "./dist/pdf-sign-kit.cjs.js"
+    },
+    "./webcomponents": "./dist/pdf-sign-kit.wc.iife.js"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build:types": "tsc -p tsconfig.json",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "build:wc": "vite build --config vite.wc.config.ts",
+    "build": "npm run build:types && npm run build:lib && npm run build:wc",
     "test": "vitest"
   },
   "peerDependencies": {
     "vue": "^3.2"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "pdf-lib": "^1.17.1"

@@ -33,13 +33,14 @@
               </template>
 
               <template v-else-if="f.type === 'signature' || f.type === 'initials'">
-                <div class="signature-field">
+                  <div
+                    class="signature-field"
+                    :class="{ empty: !values[f.id] }"
+                    @click.stop="openChoice(f)"
+                    role="button"
+                  >
                   <img v-if="values[f.id]" :src="values[f.id] as string" class="sig-preview" />
-                  <div v-else class="empty-sig">No signature</div>
-                  <div class="sig-actions">
-                    <button @click="openPad(f)" :disabled="isFieldReadonly(f)">Draw</button>
-                    <button @click="openTyped(f)" :disabled="isFieldReadonly(f)">Type</button>
-                  </div>
+                  <div v-else class="empty-placeholder">{{ f.type === 'initials' ? 'No initials' : f.type === 'signature' ? 'No signature' : 'No value' }}</div>
                 </div>
               </template>
             </div>
@@ -58,8 +59,22 @@
           :height="Math.max(120, padHeight)"
         />
         <div class="modal-actions">
-          <button @click="savePad">Save</button>
-          <button @click="closePad">Cancel</button>
+          <button class="primary" @click="savePad">Save</button>
+          <button class="secondary" @click="closePad">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- modal for choosing input method (draw/type/clear) -->
+    <div v-if="activeChoiceField" class="modal-backdrop">
+      <div class="modal">
+        <h3>{{ activeChoiceField.label || activeChoiceField.id }}</h3>
+        <p>Choose input method</p>
+        <div class="modal-actions">
+          <button @click="choiceDraw">Draw</button>
+          <button class="primary" @click="choiceType">Type</button>
+          <button v-if="values[activeChoiceField.id]" @click="choiceClear">Clear</button>
+          <button class="secondary" @click="closeChoice">Cancel</button>
         </div>
       </div>
     </div>
@@ -73,8 +88,8 @@
           <canvas ref="typedCanvas" :width="typedCanvasW" :height="typedCanvasH"></canvas>
         </div>
         <div class="modal-actions">
-          <button @click="saveTyped">Save</button>
-          <button @click="closeTyped">Cancel</button>
+          <button class="primary" @click="saveTyped">Save</button>
+          <button class="secondary" @click="closeTyped">Cancel</button>
         </div>
       </div>
     </div>
@@ -155,16 +170,20 @@ onMounted(() => {
   ensurePdfBytes();
 });
 
-const signerManager = useSignerManager(
+let signerManager = useSignerManager(
   props.template,
   originalPdfBytes.value,
   props.signer ?? null,
 );
-const values = signerManager.values as any;
-const errors = signerManager.errors as any;
+let values = signerManager.values as any;
+let errors = signerManager.errors as any;
 
 watch(originalPdfBytes, (b) => {
   // re-create manager when pdf bytes become available
+  if (!b) return;
+  signerManager = useSignerManager(props.template, b, props.signer ?? null);
+  values = signerManager.values as any;
+  errors = signerManager.errors as any;
 });
 
 function fieldsOnPage(pageIndex: number) {
@@ -194,6 +213,9 @@ const activePadField = ref<Field | null>(null);
 const padWidth = ref(400);
 const padHeight = ref(120);
 
+// choice modal (open when user clicks the signature box)
+const activeChoiceField = ref<Field | null>(null);
+
 function openPad(f: Field) {
   activePadField.value = f;
   // set pad size roughly to field pixel size if available
@@ -213,8 +235,37 @@ function closePad() {
 function savePad() {
   if (!activePadField.value) return;
   const dataUrl = padRef.value?.toDataUrl();
-  if (dataUrl) values[activePadField.value.id] = dataUrl;
+  if (dataUrl) signerManager.setValue(activePadField.value.id, dataUrl as string);
   activePadField.value = null;
+}
+
+function openChoice(f: Field) {
+  if (isFieldReadonly(f)) return;
+  // default to typed input to make typing signatures the primary flow
+  openTyped(f);
+}
+
+function closeChoice() {
+  activeChoiceField.value = null;
+}
+
+function choiceDraw() {
+  if (!activeChoiceField.value) return;
+  // open pad for this field
+  openPad(activeChoiceField.value);
+  activeChoiceField.value = null;
+}
+
+function choiceType() {
+  if (!activeChoiceField.value) return;
+  openTyped(activeChoiceField.value);
+  activeChoiceField.value = null;
+}
+
+function choiceClear() {
+  if (!activeChoiceField.value) return;
+  signerManager.setValue(activeChoiceField.value.id, null);
+  activeChoiceField.value = null;
 }
 
 // typed signature handling
@@ -244,9 +295,8 @@ function renderTypedPreview() {
   if (!c) return;
   const ctx = c.getContext('2d');
   if (!ctx) return;
+  // clear to transparent so saved image has no white background
   ctx.clearRect(0, 0, c.width, c.height);
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, c.width, c.height);
   ctx.fillStyle = '#000';
   const fontSize = Math.max(20, Math.floor(c.height * 0.5));
   ctx.font = `${fontSize}px Pacifico, cursive, serif`;
@@ -254,10 +304,15 @@ function renderTypedPreview() {
   ctx.fillText(typedText.value || '', 10, c.height / 2);
 }
 
+// update typed preview as user types
+watch(typedText, () => {
+  nextTick(() => renderTypedPreview());
+});
+
 function saveTyped() {
   if (!activeTypedField.value || !typedCanvas.value) return;
   const dataUrl = typedCanvas.value.toDataURL('image/png');
-  values[activeTypedField.value.id] = dataUrl;
+  signerManager.setValue(activeTypedField.value.id, dataUrl as string);
   activeTypedField.value = null;
 }
 
@@ -269,12 +324,16 @@ async function handleFinalize() {
       expected: props.expected ?? undefined,
       signerInfo: props.signer,
     });
-    const blob = new Blob([signedPdfBytes], { type: 'application/pdf' });
-    emit('finalized', {
-      values: Object.entries(values).map(([k, v]) => ({ fieldId: k, value: v })),
-      signedPdf: blob,
-      manifest,
-    });
+    // copy bytes into a fresh buffer to avoid errors from detached ArrayBuffers
+    let pdfCopy: Uint8Array;
+    if (signedPdfBytes instanceof Uint8Array) pdfCopy = signedPdfBytes.slice();
+    else pdfCopy = new Uint8Array(signedPdfBytes).slice();
+    const blob = new Blob([pdfCopy], { type: 'application/pdf' });
+      emit('finalized', {
+        values: Object.entries(values.value).map(([k, v]) => ({ fieldId: k, value: v })),
+        signedPdf: blob,
+        manifest,
+      });
     // also trigger download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -305,8 +364,9 @@ onMounted(() => computeIntegrity());
 
 // helpers
 function setValue(fieldId: string, v: any) {
-  values[fieldId] = v;
+  signerManager.setValue(fieldId, v as any);
 }
+
 
 // refs for pad/typed canvas
 const padRefAny = padRef;
@@ -364,6 +424,35 @@ const fieldsOnPageExport = fieldsOnPage;
   box-sizing: border-box;
   pointer-events: auto;
 }
+.field-overlay .signature-field {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.field-overlay .signature-field.empty .empty-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--primary-rgb), 0.08);
+  box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.12);
+  border: 1px dashed rgba(var(--primary-rgb), 0.6);
+  border-radius: 4px;
+  color: rgba(var(--primary-rgb), 1);
+  font-weight: 600;
+  text-align: center;
+  padding: 4px;
+  cursor: pointer;
+}
+.sig-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 .field-overlay input[type='text'],
 .field-overlay input[type='date'] {
   width: 100%;
@@ -409,6 +498,27 @@ const fieldsOnPageExport = fieldsOnPage;
   display: flex;
   gap: 8px;
   margin-top: 8px;
+}
+.modal-actions button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.modal-actions button.primary {
+  background: rgb(var(--primary-rgb, 11,118,209));
+  color: #fff;
+  border: none;
+}
+.modal-actions button.secondary {
+  background: transparent;
+  color: #333;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+.modal-actions button:hover {
+  transform: translateY(-1px);
 }
 .actions {
   margin-top: 12px;
