@@ -15,8 +15,8 @@
     <main class="demo-main">
       <aside class="demo-sidebar" @dragover.prevent @drop.prevent="handleDrop">
         <div class="cardify">
-          <h4>PDF</h4>
-          <input v-model="pdfUrl" />
+          <h4>PDF Source</h4>
+          <input v-model="pdfUrl" placeholder="Enter PDF URL or load sample" />
           <div style="margin-top: 12px">
             <button @click="loadSample">Load sample.pdf</button>
           </div>

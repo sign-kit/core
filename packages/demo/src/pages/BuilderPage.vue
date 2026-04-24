@@ -1,7 +1,26 @@
 <template>
   <div class="page">
-    <h2>Builder</h2>
-    <p>Load a PDF and edit template fields. Export/Import template JSON.</p>
+    <h2>Form Builder</h2>
+    <div class="instructions">
+      <h3>How to use:</h3>
+      <ol>
+        <li>
+          <strong>Click on the PDF pages</strong> to place new fields (text, signature, date, checkbox, email, name).
+        </li>
+        <li>
+          <strong>Drag to move</strong> fields around the page. <strong>Drag the corner handle</strong> to resize.
+        </li>
+        <li>
+          <strong>Inspect fields</strong> on the right to edit labels, set required/readonly, and configure validation.
+        </li>
+        <li>
+          <strong>Export the template JSON</strong> below, then use it in the <router-link to="/signer">Signer</router-link> to let users fill and sign.
+        </li>
+      </ol>
+      <p style="margin-top: 8px; padding: 6px 8px; background: rgba(67, 129, 193, 0.08); border-radius: 4px; font-size: 12px; color: var(--color-text-primary)">
+        Tip: The same template JSON can be imported here for editing later.
+      </p>
+    </div>
     <teleport to="#left-panel-option">
       <div class="row" style="margin-bottom: 8px; align-items: center">
         <label style="font-weight: 600; margin-right: 8px">Date locale:</label>
@@ -18,6 +37,9 @@
     </div>
     <div class="cardify">
       <h4>Template JSON</h4>
+      <p style="margin-top: 0; margin-bottom: 8px; font-size: 12px; color: var(--color-text-muted)">
+        Export this template to use in the Signer, or import a previous template to edit.
+      </p>
       <textarea v-model="templateJson" rows="20"></textarea>
       <div class="row">
         <button @click="exportTemplate">Export JSON</button>
@@ -160,6 +182,35 @@ async function importTemplate(e: Event) {
 <style scoped>
 .page {
   padding: 12px;
+}
+.instructions {
+  background: linear-gradient(135deg, rgba(67, 129, 193, 0.08) 0%, rgba(67, 129, 193, 0.02) 100%);
+  border: 1px solid rgba(67, 129, 193, 0.2);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.instructions h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: var(--color-action-primary, #4381c1);
+}
+.instructions ol {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.instructions li {
+  margin-bottom: 6px;
+}
+.instructions a {
+  color: var(--color-action-primary, #4381c1);
+  text-decoration: none;
+  font-weight: 600;
+}
+.instructions a:hover {
+  text-decoration: underline;
 }
 .builder-grid {
   display: flex;
