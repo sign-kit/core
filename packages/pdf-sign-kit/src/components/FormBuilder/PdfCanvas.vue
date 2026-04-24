@@ -58,17 +58,26 @@ const onSelect = (props as any).onSelect;
 
 try {
   // runtime debug to help root-cause empty viewer
-  console.debug('[PdfCanvas] received pageSizes length ->', (pageSizes && pageSizes.value && pageSizes.value.length) || 0);
+  console.debug(
+    '[PdfCanvas] received pageSizes length ->',
+    (pageSizes && pageSizes.value && pageSizes.value.length) || 0,
+  );
 } catch (e) {}
 
 function pageStyle(size: PageSize) {
-  const s = typeof (scale && (scale as any).value) === 'number' ? (scale as any).value : (scale as any) || 1;
+  const s =
+    typeof (scale && (scale as any).value) === 'number'
+      ? (scale as any).value
+      : (scale as any) || 1;
   const w = Math.floor(size.width * s);
   return { width: `${w}px` } as Record<string, string>;
 }
 
 function overlayStyle(size: PageSize) {
-  const s = typeof (scale && (scale as any).value) === 'number' ? (scale as any).value : (scale as any) || 1;
+  const s =
+    typeof (scale && (scale as any).value) === 'number'
+      ? (scale as any).value
+      : (scale as any) || 1;
   const w = Math.floor(size.width * s);
   const h = Math.floor(size.height * s);
   return { width: `${w}px`, height: `${h}px` } as Record<string, string>;

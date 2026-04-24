@@ -1,13 +1,18 @@
 <template>
-  <div :class="['field-box','sk-field-box', `field-type-${field.type}`]" :style="style" @pointerdown.stop="onPointerDown" ref="root">
-    <div class="label" ref="labelRef">{{ field.label || field.type }}</div>
+  <div
+    :class="['field-box', 'sk-field-box', `field-type-${field.type}`]"
+    :style="style"
+    @pointerdown.stop="onPointerDown"
+    ref="root"
+  >
+    <div class="label" ref="labelRef" :style="labelStyle">{{ field.label || field.type }}</div>
     <button class="field-delete" ref="deleteRef" @click.stop="onDelete">✕</button>
     <div class="field-handle br" @pointerdown.stop.prevent="onResizeDown"></div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import type { Field, PageSize } from '../../types';
 
 const props = defineProps<{
@@ -25,6 +30,8 @@ const emit = defineEmits<{
 const root = ref<HTMLElement | null>(null);
 const labelRef = ref<HTMLElement | null>(null);
 const deleteRef = ref<HTMLElement | null>(null);
+const labelStyle = ref<Record<string, string>>({});
+let ro: ResizeObserver | null = null;
 
 const style = computed(() => {
   const f = props.field;
@@ -180,6 +187,52 @@ function onResizeDown(e: PointerEvent) {
   window.addEventListener('pointermove', move);
   window.addEventListener('pointerup', up);
 }
+
+function updateLabelSize() {
+  const rootEl = root.value;
+  const lbl = labelRef.value;
+  if (!rootEl || !lbl) return;
+  // compute available width inside the field box for the label
+  const style = getComputedStyle(rootEl);
+  const paddingLeft = parseFloat(style.paddingLeft || '4') || 4;
+  const paddingRight = parseFloat(style.paddingRight || '8') || 8;
+  const deleteW = deleteRef.value ? deleteRef.value.offsetWidth || 20 : 20;
+  const availableW = Math.max(10, rootEl.clientWidth - paddingLeft - paddingRight - deleteW - 8);
+  const availableH = Math.max(8, rootEl.clientHeight - 4);
+
+  // measure text width at baseline font size 12
+  const text = lbl.innerText || lbl.textContent || '';
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.font = `12px ${getComputedStyle(lbl).fontFamily || 'sans-serif'}`;
+  const measured = Math.max(1, ctx.measureText(String(text)).width);
+
+  const scale = Math.min(1, availableW / measured);
+  const maxByHeight = Math.floor(availableH * 0.8);
+  const fontSize = Math.max(8, Math.min(Math.floor(12 * scale), maxByHeight));
+  labelStyle.value = { fontSize: fontSize + 'px', lineHeight: '1' };
+}
+
+onMounted(() => {
+  nextTick(() => updateLabelSize());
+  if (typeof window !== 'undefined' && 'ResizeObserver' in window) {
+    ro = new ResizeObserver(() => updateLabelSize());
+    if (root.value) ro.observe(root.value);
+    if (labelRef.value) ro.observe(labelRef.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (ro) {
+    try {
+      ro.disconnect();
+    } catch (e) {}
+    ro = null;
+  }
+});
+
+watch(() => props.field.label, () => nextTick(updateLabelSize));
 
 function onDelete() {
   emit('delete-field', props.field.id);

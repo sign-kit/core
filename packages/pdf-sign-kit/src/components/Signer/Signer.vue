@@ -35,6 +35,16 @@
       :hasValue="!!values[activeChoiceField.id]"
       :padW="padWidth"
       :padH="padHeight"
+      :targetW="
+        pageSizes[activeChoiceField.page]
+          ? activeChoiceField.width * pageSizes[activeChoiceField.page].width
+          : padWidth
+      "
+      :targetH="
+        pageSizes[activeChoiceField.page]
+          ? activeChoiceField.height * pageSizes[activeChoiceField.page].height
+          : padHeight
+      "
       @save="onChoiceSave"
       @clear="onChoiceClear"
       @close="closeChoice"
@@ -86,10 +96,10 @@ const { pdfDoc, numPages, pageSizes, loading, renderPage } = usePdfjs(pdfSrcRef 
 // canvas refs
 const canvasRefs = ref<Array<HTMLCanvasElement | null>>([]);
 function setCanvasRef(i: number) {
-  return (el: HTMLCanvasElement | null) => {
-    canvasRefs.value[i] = el;
+  return (el: any) => {
+    canvasRefs.value[i] = el as HTMLCanvasElement | null;
     // render when element appears
-    if (el && pageSizes.value[i]) renderPage(i + 1, el);
+    if (el && pageSizes.value[i]) renderPage(i + 1, el as HTMLCanvasElement);
   };
 }
 
@@ -196,7 +206,7 @@ async function handleFinalize() {
     const { signedPdfBytes, manifest } = await signerManager.finalize({
       mode,
       expected: props.expectedHashes ?? undefined,
-      signerInfo: props.signer,
+      signerInfo: props.signer ?? undefined,
       embedPdfHash: props.embedPdfHash ?? false,
       verificationMode: props.verificationMode ?? 'warn',
       allowOverride: props.allowOverride ?? false,
@@ -216,7 +226,7 @@ async function handleFinalize() {
     let pdfCopy: Uint8Array;
     if (signedPdfBytes instanceof Uint8Array) pdfCopy = signedPdfBytes.slice();
     else pdfCopy = new Uint8Array(signedPdfBytes).slice();
-    const blob = new Blob([pdfCopy], { type: 'application/pdf' });
+    const blob = new Blob([pdfCopy.buffer as ArrayBuffer], { type: 'application/pdf' });
     emit('finalized', {
       values: Object.entries(values.value).map(([k, v]) => ({ fieldId: k, value: v })),
       signedPdf: blob,
@@ -326,6 +336,7 @@ const pageSizesLocal = pageSizes;
   position: absolute;
   box-sizing: border-box;
   pointer-events: auto;
+  overflow: hidden;
 }
 .field-overlay.field-type-signature,
 .field-overlay.field-type-initials {
@@ -460,7 +471,7 @@ const pageSizesLocal = pageSizes;
 }
 .modal-actions button.secondary {
   background: transparent;
-  color: var(--sk-color-text-primary);
+  color: var(--sk-color-text-secondary);
   border: 1px solid var(--sk-color-border-default);
 }
 .modal-actions button:hover {

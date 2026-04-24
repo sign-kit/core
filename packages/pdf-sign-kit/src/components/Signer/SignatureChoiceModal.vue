@@ -14,7 +14,7 @@
           </div>
         </div>
         <div style="display: flex; justify-content: center" v-else>
-          <SignaturePad ref="padRef" :width="Math.max(300, padW)" :height="Math.max(120, padH)" />
+          <SignaturePad ref="padRef" :width="padW" :height="padH" />
         </div>
       </div>
       <div class="modal-actions">
@@ -37,6 +37,9 @@ const props = defineProps<{
   hasValue?: boolean;
   padW?: number;
   padH?: number;
+  // target display size (field bbox in page CSS pixels) - used to scale saved image
+  targetW?: number;
+  targetH?: number;
 }>();
 const emit = defineEmits<{
   (e: 'save', dataUrl: string | null): void;
@@ -102,8 +105,43 @@ function handleSave() {
   if (mode.value === 'type') {
     const c = typedCanvas.value;
     if (!c) return emit('save', null);
+    // scale down to target field size if provided (do not upscale)
+    if (props.targetW && props.targetH) {
+      const outW = Math.max(1, Math.floor(props.targetW));
+      const outH = Math.max(1, Math.floor(props.targetH));
+      const srcW = c.width || typedW.value;
+      const srcH = c.height || typedH.value;
+      const scale = Math.min(1, Math.min(outW / srcW, outH / srcH));
+      const drawW = Math.max(1, Math.floor(srcW * scale));
+      const drawH = Math.max(1, Math.floor(srcH * scale));
+      const tmp = document.createElement('canvas');
+      tmp.width = outW;
+      tmp.height = outH;
+      const tctx = tmp.getContext('2d');
+      if (tctx) {
+        tctx.clearRect(0, 0, outW, outH);
+        const offsetX = Math.floor((outW - drawW) / 2);
+        const offsetY = Math.floor((outH - drawH) / 2);
+        tctx.imageSmoothingEnabled = true;
+        tctx.imageSmoothingQuality = 'high';
+        tctx.drawImage(c, 0, 0, srcW, srcH, offsetX, offsetY, drawW, drawH);
+        emit('save', tmp.toDataURL('image/png'));
+        return;
+      }
+    }
     emit('save', c.toDataURL('image/png'));
   } else {
+    // prefer cropped export to trim whitespace and fit target field
+    if (typeof padRef.value?.toDataUrlCropped === 'function' && props.targetW && props.targetH) {
+      (padRef.value as any)
+        .toDataUrlCropped(props.targetW, props.targetH)
+        .then((url: string | null) => emit('save', url ?? null))
+        .catch(() => {
+          const url = padRef.value?.toDataUrl?.();
+          emit('save', url ?? null);
+        });
+      return;
+    }
     const url = padRef.value?.toDataUrl?.();
     emit('save', url ?? null);
   }

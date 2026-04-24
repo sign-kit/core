@@ -20,14 +20,19 @@
         :onSelect="onFieldSelect"
       />
 
-      <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display: flex; flex-direction: column; gap: 12px">
         <FieldPalette
           :fieldTypes="fieldTypes"
           :activeType="activeType"
           @drag-start="onDragStart"
           @set-active="setActiveType"
         />
-        <FieldInspector v-if="selectedField" :field="selectedField" @update-field="onUpdateField" @delete-field="onDeleteField" />
+        <FieldInspector
+          v-if="selectedField"
+          :field="selectedField"
+          @update-field="onUpdateField"
+          @delete-field="onDeleteField"
+        />
       </div>
     </div>
   </div>
@@ -75,7 +80,16 @@ const { template, setPages, addField, updateField, removeField, exportTemplate }
 );
 
 const scale = ref(props.initialZoom ?? 1);
-const fieldTypes = ['signature', 'initials', 'text', 'date', 'current_date', 'checkbox', 'name', 'email'];
+const fieldTypes = [
+  'signature',
+  'initials',
+  'text',
+  'date',
+  'current_date',
+  'checkbox',
+  'name',
+  'email',
+];
 const activeType = ref<Field['type']>(fieldTypes[0]);
 
 const defaultSizes: Record<string, { w: number; h: number }> = {
@@ -90,11 +104,16 @@ const defaultSizes: Record<string, { w: number; h: number }> = {
 };
 
 const selectedFieldId = ref<string | null>(null);
-const selectedField = computed(() => template.value.fields.find((f) => f.id === selectedFieldId.value) || null);
+const selectedField = computed(
+  () => template.value.fields.find((f) => f.id === selectedFieldId.value) || null,
+);
 
 watch(pageSizes, (sizes) => {
   try {
-    console.debug('[FormBuilder] pageSizes -> length=', (sizes && sizes.length) || (sizes && sizes.value && sizes.value.length) || 0);
+    console.debug(
+      '[FormBuilder] pageSizes -> length=',
+      (sizes && sizes.length) || (sizes && sizes.value && sizes.value.length) || 0,
+    );
   } catch (e) {
     console.debug('[FormBuilder] pageSizes -> (unable to read length)');
   }
@@ -255,7 +274,8 @@ function onDrop(ev: DragEvent, pageIndex: number) {
   if (!pageSize) return;
   // compute preview size the same way the bank drag preview was created
   const def = defaultSizes[type] || { w: 0.18, h: 0.05 };
-  const basePage = pageSizes.value && pageSizes.value[0] ? pageSizes.value[0].width : pageSize.width;
+  const basePage =
+    pageSizes.value && pageSizes.value[0] ? pageSizes.value[0].width : pageSize.width;
   const previewW = Math.max(48, Math.floor(def.w * basePage * (scale.value || 1)));
   const previewH = Math.max(28, Math.floor(def.h * basePage * (scale.value || 1)));
   const pxW = pageSize.width * scale.value;

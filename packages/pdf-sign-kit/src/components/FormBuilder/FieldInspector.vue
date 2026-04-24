@@ -30,16 +30,28 @@ const emit = defineEmits<{
   (e: 'delete-field', id: string): void;
 }>();
 
-const local = reactive({ label: props.field.label || '', required: !!props.field.required, role: props.field.role || '' });
-
-watch(() => props.field, (f) => {
-  local.label = f.label || '';
-  local.required = !!f.required;
-  local.role = f.role || '';
+const local = reactive({
+  label: props.field.label || '',
+  required: !!props.field.required,
+  role: props.field.role || '',
 });
 
+watch(
+  () => props.field,
+  (f) => {
+    local.label = f.label || '';
+    local.required = !!f.required;
+    local.role = f.role || '';
+  },
+);
+
 function save() {
-  emit('update-field', { id: props.field.id, label: local.label, required: local.required, role: local.role });
+  emit('update-field', {
+    id: props.field.id,
+    label: local.label,
+    required: local.required,
+    role: local.role,
+  });
 }
 function del() {
   emit('delete-field', props.field.id);
@@ -47,8 +59,25 @@ function del() {
 </script>
 
 <style scoped>
-.field-inspector { margin-top:12px; padding:12px; background:var(--sk-color-bg-surface); border:1px solid var(--sk-color-border-default); border-radius:var(--sk-radius-sm) }
-.inspector-row { display:flex; gap:8px; align-items:center; margin-bottom:8px }
-.inspector-row label { min-width:70px; font-weight:600 }
-.inspector-actions { display:flex; gap:8px; }
+.field-inspector {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--sk-color-bg-surface);
+  border: 1px solid var(--sk-color-border-default);
+  border-radius: var(--sk-radius-sm);
+}
+.inspector-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.inspector-row label {
+  min-width: 70px;
+  font-weight: 600;
+}
+.inspector-actions {
+  display: flex;
+  gap: 8px;
+}
 </style>

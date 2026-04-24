@@ -11,5 +11,9 @@
 </script>
 
 <style scoped>
-.toolbar-left { display:flex; gap:8px; align-items:center }
+.toolbar-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 </style>

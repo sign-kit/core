@@ -50,10 +50,24 @@ const puppeteer = require('puppeteer');
     console.log('Saved screenshot:', shotPath);
 
     const domInfo = await page.evaluate(() => {
-      const canvases = Array.from(document.querySelectorAll('canvas')).map((c) => ({ w: c.width, h: c.height, visible: !!(c.offsetParent) }));
-      const overlays = Array.from(document.querySelectorAll('.overlay')).map((el) => ({ children: el.children.length, rect: el.getBoundingClientRect().toJSON ? el.getBoundingClientRect().toJSON() : {} }));
-      const fields = Array.from(document.querySelectorAll('.sk-field-box')).map((el) => ({ text: el.innerText.trim(), rect: el.getBoundingClientRect().toJSON ? el.getBoundingClientRect().toJSON() : {} }));
-      const fieldOverlays = Array.from(document.querySelectorAll('.field-overlay')).map((el) => ({ html: el.outerHTML ? el.outerHTML.slice(0, 800) : null, style: el.getAttribute('style'), rect: el.getBoundingClientRect().toJSON ? el.getBoundingClientRect().toJSON() : {} }));
+      const canvases = Array.from(document.querySelectorAll('canvas')).map((c) => ({
+        w: c.width,
+        h: c.height,
+        visible: !!c.offsetParent,
+      }));
+      const overlays = Array.from(document.querySelectorAll('.overlay')).map((el) => ({
+        children: el.children.length,
+        rect: el.getBoundingClientRect().toJSON ? el.getBoundingClientRect().toJSON() : {},
+      }));
+      const fields = Array.from(document.querySelectorAll('.sk-field-box')).map((el) => ({
+        text: el.innerText.trim(),
+        rect: el.getBoundingClientRect().toJSON ? el.getBoundingClientRect().toJSON() : {},
+      }));
+      const fieldOverlays = Array.from(document.querySelectorAll('.field-overlay')).map((el) => ({
+        html: el.outerHTML ? el.outerHTML.slice(0, 800) : null,
+        style: el.getAttribute('style'),
+        rect: el.getBoundingClientRect().toJSON ? el.getBoundingClientRect().toJSON() : {},
+      }));
       const viewer = document.querySelector('.pdf-builder__viewer')?.outerHTML || null;
       const viewerCount = !!document.querySelector('.pdf-builder__viewer');
       const title = document.title;
@@ -79,4 +93,3 @@ const puppeteer = require('puppeteer');
   console.error('Unhandled error:', e);
   process.exit(2);
 });
-

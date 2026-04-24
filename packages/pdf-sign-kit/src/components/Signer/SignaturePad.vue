@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, defineProps, watch, onBeforeUnmount, nextTick } from 'vue';
+import { ref, onMounted, watch, onBeforeUnmount, nextTick } from 'vue';
 
 const props = defineProps<{
   width?: number;
@@ -79,7 +79,7 @@ function pointerUp() {
 
 function clearCanvas() {
   if (!ctx || !canvas.value) return;
-  ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
+  ctx.clearRect(0, 0, width, height);
 }
 
 function toDataUrl(type = 'image/png', quality?: number) {
@@ -92,9 +92,22 @@ function loadImage(dataUrl: string) {
     if (!canvas.value || !ctx) return resolve();
     const img = new Image();
     img.onload = () => {
-      ctx!.clearRect(0, 0, canvas.value!.width, canvas.value!.height);
-      // draw scaled to canvas size
-      ctx!.drawImage(img, 0, 0, width, height);
+      // clear using logical canvas dimensions (not device pixels)
+      ctx!.clearRect(0, 0, width, height);
+      // draw image preserving aspect ratio and center it
+      const imgW = img.width || 0;
+      const imgH = img.height || 0;
+      if (imgW === 0 || imgH === 0) {
+        ctx!.drawImage(img, 0, 0, width, height);
+        resolve();
+        return;
+      }
+      const scale = Math.min(width / imgW, height / imgH);
+      const drawW = imgW * scale;
+      const drawH = imgH * scale;
+      const offsetX = (width - drawW) / 2;
+      const offsetY = (height - drawH) / 2;
+      ctx!.drawImage(img, offsetX, offsetY, drawW, drawH);
       resolve();
     };
     img.src = dataUrl;
@@ -167,7 +180,7 @@ defineExpose(handle);
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid var(--sk-color-border-default);
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   color: var(--sk-color-text-primary);
   font-weight: 600;
 }
