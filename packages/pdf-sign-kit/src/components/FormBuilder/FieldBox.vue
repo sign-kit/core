@@ -232,7 +232,10 @@ onBeforeUnmount(() => {
   }
 });
 
-watch(() => props.field.label, () => nextTick(updateLabelSize));
+watch(
+  () => props.field.label,
+  () => nextTick(updateLabelSize),
+);
 
 function onDelete() {
   emit('delete-field', props.field.id);
