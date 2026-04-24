@@ -99,6 +99,9 @@ function renderTypedPreview() {
   ctx.fillText(text, padding, baselineY);
 }
 
+watch(mode, () => nextTick(() => renderTypedPreview()), {
+  immediate: true,
+});
 watch(typedText, () => nextTick(() => renderTypedPreview()));
 
 function handleSave() {

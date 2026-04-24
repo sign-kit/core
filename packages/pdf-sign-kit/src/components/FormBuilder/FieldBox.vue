@@ -31,6 +31,7 @@ const root = ref<HTMLElement | null>(null);
 const labelRef = ref<HTMLElement | null>(null);
 const deleteRef = ref<HTMLElement | null>(null);
 const labelStyle = ref<Record<string, string>>({});
+const isResizing = ref(false);
 let ro: ResizeObserver | null = null;
 
 const style = computed(() => {
@@ -39,6 +40,13 @@ const style = computed(() => {
   const top = f.y * props.pageSize.height * props.scale;
   const width = f.width * props.pageSize.width * props.scale;
   const height = f.height * props.pageSize.height * props.scale;
+  // During resize, exclude width/height so inline styles take precedence
+  if (isResizing.value) {
+    return {
+      left: `${left}px`,
+      top: `${top}px`,
+    } as Record<string, string>;
+  }
   return {
     left: `${left}px`,
     top: `${top}px`,
@@ -143,9 +151,12 @@ function onResizeDown(e: PointerEvent) {
     (root.value as HTMLElement).setPointerCapture(e.pointerId);
   } catch {}
 
+  isResizing.value = true;
   const f = { ...props.field };
-  const initialLeft = f.x * pageW;
-  const initialTop = f.y * pageH;
+  const startX = e.clientX;
+  const startY = e.clientY;
+  const initialW = fieldRect.width;
+  const initialH = fieldRect.height;
 
   // compute minimum sizes in pixels based on label and delete button
   const minLabelWidth = labelRef.value ? labelRef.value.scrollWidth + 12 : 40; // padding
@@ -154,10 +165,10 @@ function onResizeDown(e: PointerEvent) {
   const minHeightPx = Math.max(20, labelRef.value ? labelRef.value.scrollHeight + 8 : 20);
 
   const move = (ev: PointerEvent) => {
-    const px = ev.clientX - overlayRect.left;
-    const py = ev.clientY - overlayRect.top;
-    const newW = Math.max(minWidthPx, px - initialLeft);
-    const newH = Math.max(minHeightPx, py - initialTop);
+    const dx = ev.clientX - startX;
+    const dy = ev.clientY - startY;
+    const newW = Math.max(minWidthPx, initialW + dx);
+    const newH = Math.max(minHeightPx, initialH + dy);
     if (root.value) {
       (root.value as HTMLElement).style.width = `${newW}px`;
       (root.value as HTMLElement).style.height = `${newH}px`;
@@ -165,6 +176,7 @@ function onResizeDown(e: PointerEvent) {
   };
 
   const up = () => {
+    isResizing.value = false;
     try {
       (root.value as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
