@@ -11,18 +11,21 @@
   "files": [
     "dist"
   ],
+  "style": "dist/styles/index.css",
   "exports": {
     ".": {
       "import": "./dist/pdf-sign-kit.es.js",
       "require": "./dist/pdf-sign-kit.cjs.js"
     },
-    "./webcomponents": "./dist/pdf-sign-kit.wc.iife.js"
+    "./webcomponents": "./dist/pdf-sign-kit.wc.iife.js",
+    "./styles.css": "./dist/styles/index.css"
   },
   "scripts": {
     "build:types": "tsc -p tsconfig.json",
     "build:lib": "vite build --config vite.lib.config.ts",
     "build:wc": "vite build --config vite.wc.config.ts",
-    "build": "npm run build:types && npm run build:lib && npm run build:wc",
+    "build:copy-styles": "node scripts/copy-styles.js",
+    "build": "npm run build:types && npm run build:lib && npm run build:wc && npm run build:copy-styles",
     "test": "vitest"
   },
   "peerDependencies": {

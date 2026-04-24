@@ -1,0 +1,8 @@
+[PAGE CONSOLE] DEBUG: [vite] connecting...
+[PAGE CONSOLE] DEBUG: [vite] connected.
+[PAGE CONSOLE] DEBUG: [FormBuilder] initial props.pdf -> /sample/sample.pdf
+[PAGE CONSOLE] DEBUG: [PdfCanvas] received pageSizes length -> 0
+[PAGE CONSOLE] DEBUG: [FormBuilder] pageSizes -> length= 1
+[PAGE CONSOLE] DEBUG: [FormBuilder] pdf loading -> false
+[PAGE CONSOLE] DEBUG: [vite] connecting...
+[PAGE CONSOLE] DEBUG: [vite] connected.

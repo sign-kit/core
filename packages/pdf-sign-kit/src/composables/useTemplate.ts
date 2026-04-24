@@ -1,30 +1,52 @@
 import { ref, watch } from 'vue';
 import type { Template, Field, FieldType, PageSize } from '../types';
+import { ensurePdfRoot, migratePdfSourceFromLegacy } from '../utils/template';
 
 function genId(prefix = 'f') {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 export function useTemplate(initial?: Template | null) {
-  const template = ref<Template>(
-    initial || {
-      id: genId('tmpl'),
-      version: '1.0.0',
-      title: 'Untitled template',
-      pdfHash: null,
-      pages: [],
-      fields: [],
-      // store creation locale so date formatting can default to the creator's browser
-      meta:
-        typeof navigator !== 'undefined' && (navigator as any).language
-          ? { dateLocale: (navigator as any).language }
-          : {},
-      createdAt: new Date().toISOString(),
-    },
-  );
+  // prepare a baseline template, migrating legacy metadata and ensuring pdf root
+  const seed: Template = initial
+    ? migratePdfSourceFromLegacy(initial)
+    : {
+        id: genId('tmpl'),
+        version: '1.0.0',
+        title: 'Untitled template',
+        pdfHash: null,
+        // include pdf root for template-level PDF metadata (kept alongside legacy pages[])
+        pdf: {
+          source: { type: 'url', value: '' },
+          fingerprint: undefined,
+          hash: null,
+          pageCount: 0,
+          pages: [],
+        },
+        pages: [],
+        fields: [],
+        // store creation locale so date formatting can default to the creator's browser
+        meta:
+          typeof navigator !== 'undefined' && (navigator as any).language
+            ? { dateLocale: (navigator as any).language }
+            : {},
+        createdAt: new Date().toISOString(),
+      };
+
+  ensurePdfRoot(seed as Template);
+
+  const template = ref<Template>(seed as Template);
 
   function setPages(sizes: PageSize[]) {
     template.value.pages = sizes;
+    // keep pdf.pages in sync with top-level pages for backwards compatibility
+    if (!template.value.pdf) template.value.pdf = {} as any;
+    (template.value.pdf as any).pages = sizes.map((s, i) => ({
+      page: i,
+      width: s.width,
+      height: s.height,
+    }));
+    (template.value.pdf as any).pageCount = sizes.length;
     template.value.updatedAt = new Date().toISOString();
   }
 

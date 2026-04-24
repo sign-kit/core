@@ -20,7 +20,13 @@ const props = defineProps<{
 
 const width = props.width ?? 400;
 const height = props.height ?? 120;
-const strokeColor = props.strokeColor ?? '#000';
+const strokeColor =
+  props.strokeColor ??
+  (typeof window !== 'undefined'
+    ? getComputedStyle(document.documentElement)
+        .getPropertyValue('--sk-color-text-primary')
+        .trim() || '#000'
+    : '#000');
 const strokeWidth = props.strokeWidth ?? 2;
 const showControls = props.showControls ?? true;
 
@@ -136,17 +142,33 @@ defineExpose(handle);
 .signature-pad {
   position: relative;
   user-select: none;
+  background: var(--sk-field-accent-rgba);
+  padding: 8px;
+  border-radius: var(--sk-radius-sm);
+  box-shadow: var(--sk-shadow-sm);
 }
 .sig-canvas {
   display: block;
   touch-action: none;
-  background: transparent;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: #fff;
+  border: var(--sk-field-border-width) solid var(--sk-field-accent);
+  border-radius: var(--sk-radius-sm);
+  width: 100%;
+  height: auto;
 }
 .controls {
-  position: absolute;
-  right: 6px;
-  top: 6px;
+  position: static;
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.controls button {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--sk-color-border-default);
+  background: rgba(255,255,255,0.95);
+  color: var(--sk-color-text-primary);
+  font-weight: 600;
 }
 </style>

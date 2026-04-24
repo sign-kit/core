@@ -1,0 +1,8 @@
+@import './tokens.css';
+
+.sk-button{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:var(--sk-radius-md);border:1px solid var(--sk-color-border-default);cursor:pointer;font-weight:600;gap:8px}
+.sk-button--primary{background:var(--sk-color-action-primary);color:var(--sk-color-on-action);border:none}
+.sk-button--primary:hover{background:var(--sk-color-action-primary-hover)}
+.sk-button--secondary{background:var(--sk-color-action-secondary);color:var(--sk-color-on-action);border:none}
+.sk-button--neutral{background:transparent;color:var(--sk-color-text-primary);border:1px solid var(--sk-color-border-default)}
+.sk-button--danger{background:var(--sk-color-action-danger);color:var(--sk-color-on-action);border:none}

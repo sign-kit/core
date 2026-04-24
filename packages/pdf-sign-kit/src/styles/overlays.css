@@ -1,0 +1,7 @@
+@import './tokens.css';
+
+.sk-field-box{position:relative;border:1px dashed var(--sk-color-border-default);background:transparent;border-radius:6px;padding:4px;box-sizing:border-box}
+.sk-field-box--selected{border-style:solid;border-color:var(--sk-color-field-selected);box-shadow:0 6px 18px rgba(78,205,196,0.08)}
+.sk-field-box--invalid{border-color:var(--sk-color-field-invalid)}
+.sk-handle{width:10px;height:10px;border-radius:2px;background:var(--sk-color-field-hover);position:absolute;right:-6px;bottom:-6px}
+.sk-delete{position:absolute;left:-8px;top:-8px;background:var(--sk-color-action-danger);color:var(--sk-color-on-action);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px}

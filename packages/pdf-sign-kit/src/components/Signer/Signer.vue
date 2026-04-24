@@ -1,8 +1,6 @@
 <template>
   <div class="signer-root">
-    <div v-if="integrity && mode === 'integrity'" class="integrity-banner">
-      Integrity: <strong>{{ integrity.ok ? 'OK' : 'MISMATCH' }}</strong>
-    </div>
+    <IntegrityBanner :integrity="integrity" :mode="mode" />
 
     <div class="pages">
       <div v-for="(sz, idx) in pageSizes" :key="idx" class="page-wrapper">
@@ -13,121 +11,34 @@
               v-for="f in fieldsOnPage(idx)"
               :key="f.id"
               class="field-overlay"
+              :class="`field-type-${f.type}`"
               :style="fieldStyle(f, idx)"
             >
-              <template v-if="f.type === 'text' || f.type === 'name' || f.type === 'email'">
-                <input
-                  :disabled="isFieldReadonly(f)"
-                  type="text"
-                  :placeholder="(f as any).placeholder || f.label || ''"
-                  v-model="values[f.id]"
-                />
-              </template>
-
-              <template v-else-if="f.type === 'date' || f.type === 'current_date'">
-                <input type="date" :disabled="isFieldReadonly(f)" v-model="values[f.id]" />
-              </template>
-
-              <template v-else-if="f.type === 'checkbox'">
-                <input type="checkbox" :disabled="isFieldReadonly(f)" v-model="values[f.id]" />
-              </template>
-
-              <template v-else-if="f.type === 'signature' || f.type === 'initials'">
-                <div
-                  class="signature-field"
-                  :class="{ empty: !values[f.id] }"
-                  @click.stop="openChoice(f)"
-                  role="button"
-                >
-                  <img v-if="values[f.id]" :src="values[f.id] as string" class="sig-preview" />
-                  <div v-else class="empty-placeholder">
-                    {{
-                      f.type === 'initials'
-                        ? 'No initials'
-                        : f.type === 'signature'
-                          ? 'No signature'
-                          : 'No value'
-                    }}
-                  </div>
-                </div>
-              </template>
+              <FieldInput
+                :field="f"
+                :value="values[f.id]"
+                :readonly="isFieldReadonly(f)"
+                :placeholder="(f as any).placeholder || f.label || ''"
+                @set-value="(v) => signerManager.setValue(f.id, v)"
+                @open-choice="openChoice"
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- modal for signature pad -->
-    <div v-if="activePadField" class="modal-backdrop">
-      <div class="modal">
-        <h3>Sign: {{ activePadField.label || activePadField.id }}</h3>
-        <SignaturePad
-          ref="padRef"
-          :width="Math.max(300, padWidth)"
-          :height="Math.max(120, padHeight)"
-        />
-        <div class="modal-actions">
-          <button class="primary" @click="savePad">Save</button>
-          <button class="secondary" @click="closePad">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- modal for choosing input method (tabs: Type / Draw) -->
-    <div v-if="activeChoiceField" class="modal-backdrop">
-      <div class="modal">
-        <h3>{{ activeChoiceField.label || activeChoiceField.id }}</h3>
-        <div class="choice-tabs" style="display: flex; gap: 8px; margin-bottom: 8px">
-          <button
-            :class="{ active: activeChoiceMode === 'type' }"
-            @click="activeChoiceMode = 'type'"
-          >
-            Type
-          </button>
-          <button
-            :class="{ active: activeChoiceMode === 'draw' }"
-            @click="activeChoiceMode = 'draw'"
-          >
-            Draw
-          </button>
-        </div>
-        <div class="choice-body">
-          <div v-if="activeChoiceMode === 'type'">
-            <input v-model="typedText" placeholder="Type your name" />
-            <div class="modal-preview">
-              <canvas ref="typedCanvas" :width="typedCanvasW" :height="typedCanvasH"></canvas>
-            </div>
-          </div>
-          <div v-else>
-            <SignaturePad
-              ref="padRef"
-              :width="Math.max(300, padWidth)"
-              :height="Math.max(120, padHeight)"
-            />
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="primary" @click="saveChoice">Save</button>
-          <button v-if="values[activeChoiceField.id]" @click="choiceClear">Clear</button>
-          <button class="secondary" @click="closeChoice">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- modal for typed signature -->
-    <div v-if="activeTypedField" class="modal-backdrop">
-      <div class="modal">
-        <h3>Type Signature: {{ activeTypedField.label || activeTypedField.id }}</h3>
-        <input v-model="typedText" placeholder="Type your name" />
-        <div class="modal-preview">
-          <canvas ref="typedCanvas" :width="typedCanvasW" :height="typedCanvasH"></canvas>
-        </div>
-        <div class="modal-actions">
-          <button class="primary" @click="saveTyped">Save</button>
-          <button class="secondary" @click="closeTyped">Cancel</button>
-        </div>
-      </div>
-    </div>
+    <SignatureChoiceModal
+      v-if="activeChoiceField"
+      :field="activeChoiceField"
+      :initialTyped="props.signer?.name"
+      :hasValue="!!values[activeChoiceField.id]"
+      :padW="padWidth"
+      :padH="padHeight"
+      @save="onChoiceSave"
+      @clear="onChoiceClear"
+      @close="closeChoice"
+    />
 
     <div class="actions">
       <div class="errors" v-if="Object.keys(errors).length">
@@ -141,7 +52,9 @@
 <script lang="ts" setup>
 import { ref, watch, computed, onMounted, reactive, nextTick } from 'vue';
 import type { Template, Field } from '../../types';
-import SignaturePad from './SignaturePad.vue';
+import FieldInput from './FieldInput.vue';
+import SignatureChoiceModal from './SignatureChoiceModal.vue';
+import IntegrityBanner from './IntegrityBanner.vue';
 import { usePdfjs } from '../../composables/usePdfjs';
 import { useSignerManager } from '../../composables/useSigner';
 import { canonicalizeTemplate, computeSha256, computeValuesHash } from '../../utils/signer';
@@ -244,145 +157,37 @@ function isFieldReadonly(f: Field) {
   return false;
 }
 
-// signature pad handling
-const padRef = ref<any>(null);
-const activePadField = ref<Field | null>(null);
+// signature handling (choice modal)
 const padWidth = ref(400);
 const padHeight = ref(120);
-
-// choice modal (open when user clicks the signature box)
 const activeChoiceField = ref<Field | null>(null);
-// which tab is active in the choice modal: 'type' or 'draw'
-const activeChoiceMode = ref<'type' | 'draw'>('type');
 
-function openPad(f: Field) {
-  activePadField.value = f;
-  // set pad size roughly to field pixel size if available
+function openChoice(f: Field) {
+  if (isFieldReadonly(f)) return;
+  activeChoiceField.value = f;
   const sz = pageSizes.value[f.page];
   if (sz) {
     padWidth.value = Math.max(200, f.width * sz.width);
     padHeight.value = Math.max(80, f.height * sz.height);
   }
-  // clear pad
-  nextTick(() => padRef.value?.clear());
-}
-
-function closePad() {
-  activePadField.value = null;
-}
-
-function savePad() {
-  if (!activePadField.value) return;
-  const dataUrl = padRef.value?.toDataUrl();
-  if (dataUrl) signerManager.setValue(activePadField.value.id, dataUrl as string);
-  activePadField.value = null;
-}
-
-function openChoice(f: Field) {
-  if (isFieldReadonly(f)) return;
-  // present choice modal so users can choose Draw or Type; default to Type
-  activeChoiceField.value = f;
-  activeChoiceMode.value = 'type';
 }
 
 function closeChoice() {
   activeChoiceField.value = null;
 }
 
-function saveChoice() {
-  if (!activeChoiceField.value) return;
-  if (activeChoiceMode.value === 'type') {
-    // ensure typed field is set as active before saving
-    activeTypedField.value = activeChoiceField.value;
-    saveTyped();
-  } else {
-    // open/save pad for this field
-    activePadField.value = activeChoiceField.value;
-    savePad();
-  }
+function onChoiceSave(dataUrl: string | null) {
+  const f = activeChoiceField.value;
+  if (!f) return;
+  signerManager.setValue(f.id, dataUrl);
   activeChoiceField.value = null;
 }
 
-// when switching modes, seed typed text or clear pad accordingly
-watch(() => activeChoiceMode.value, setupChoice);
-watch(() => activeChoiceField.value, setupChoice);
-
-function setupChoice() {
-  if (activeChoiceMode.value === 'type') {
-    typedText.value = props.signer?.name ?? '';
-    nextTick(() => renderTypedPreview());
-  } else {
-    nextTick(() => padRef.value?.clear?.());
-  }
-}
-
-function choiceClear() {
-  if (!activeChoiceField.value) return;
-  signerManager.setValue(activeChoiceField.value.id, null);
+function onChoiceClear() {
+  const f = activeChoiceField.value;
+  if (!f) return;
+  signerManager.setValue(f.id, null);
   activeChoiceField.value = null;
-}
-
-// typed signature handling
-const activeTypedField = ref<Field | null>(null);
-const typedText = ref('');
-const typedCanvas = ref<HTMLCanvasElement | null>(null);
-const typedCanvasW = ref(400);
-const typedCanvasH = ref(120);
-
-function openTyped(f: Field) {
-  activeTypedField.value = f;
-  const sz = pageSizes.value[f.page];
-  if (sz) {
-    typedCanvasW.value = Math.max(200, Math.floor(f.width * sz.width));
-    typedCanvasH.value = Math.max(80, Math.floor(f.height * sz.height));
-  }
-  typedText.value = props.signer?.name ?? '';
-  nextTick(() => renderTypedPreview());
-}
-
-function closeTyped() {
-  activeTypedField.value = null;
-}
-
-function renderTypedPreview() {
-  const c = typedCanvas.value;
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  if (!ctx) return;
-  // clear to transparent so saved image has no white background
-  ctx.clearRect(0, 0, c.width, c.height);
-  ctx.fillStyle = '#000';
-  const padding = 8;
-  const family = 'Pacifico, cursive, serif';
-  // start with a font size based on canvas height, then shrink to fit width if needed
-  let fontSize = Math.max(20, Math.floor((c.height - padding * 2) * 0.6));
-  ctx.textBaseline = 'alphabetic';
-  ctx.font = `${fontSize}px ${family}`;
-  const text = typedText.value || '';
-  let metrics = ctx.measureText(text);
-  const availW = Math.max(10, c.width - padding * 2);
-  if (metrics.width > availW && metrics.width > 0) {
-    const scale = availW / metrics.width;
-    fontSize = Math.max(12, Math.floor(fontSize * scale));
-    ctx.font = `${fontSize}px ${family}`;
-    metrics = ctx.measureText(text);
-  }
-  const ascent = (metrics.actualBoundingBoxAscent as number) || fontSize * 0.75;
-  const descent = (metrics.actualBoundingBoxDescent as number) || fontSize * 0.25;
-  const baselineY = (c.height + ascent - descent) / 2;
-  ctx.fillText(text, padding, baselineY);
-}
-
-// update typed preview as user types
-watch(typedText, () => {
-  nextTick(() => renderTypedPreview());
-});
-
-function saveTyped() {
-  if (!activeTypedField.value || !typedCanvas.value) return;
-  const dataUrl = typedCanvas.value.toDataURL('image/png');
-  signerManager.setValue(activeTypedField.value.id, dataUrl as string);
-  activeTypedField.value = null;
 }
 
 // finalize
@@ -485,32 +290,13 @@ function setValue(fieldId: string, v: any) {
   signerManager.setValue(fieldId, v as any);
 }
 
-// refs for pad/typed canvas
-const padRefAny = padRef;
-
-// expose template for CSS linking
+// helpers exposed to template
 const pageSizesLocal = pageSizes;
-
-// used in template
-const padRefExport = padRefAny;
-
-// typed canvas ref assigner
-function setTypedCanvas(el: HTMLCanvasElement | null) {
-  typedCanvas.value = el;
-}
-
-// export for template usage
-const fieldsOnPageExport = fieldsOnPage;
 </script>
 
 <style scoped>
 .signer-root {
-  font-family:
-    system-ui,
-    Segoe UI,
-    Roboto,
-    Helvetica,
-    Arial;
+  font-family: var(--sk-font-family-sans);
 }
 .pages {
   display: flex;
@@ -523,7 +309,7 @@ const fieldsOnPageExport = fieldsOnPage;
 }
 .page-canvas-wrap {
   position: relative;
-  background: #eee;
+  background: var(--sk-color-bg-surface-subtle);
 }
 .page-canvas {
   display: block;
@@ -541,6 +327,19 @@ const fieldsOnPageExport = fieldsOnPage;
   box-sizing: border-box;
   pointer-events: auto;
 }
+.field-overlay.field-type-signature,
+.field-overlay.field-type-initials {
+  border: var(--sk-field-border-width) solid var(--sk-field-accent);
+  background: var(--sk-field-accent-rgba);
+  border-radius: var(--sk-radius-sm);
+  padding: 4px;
+}
+.field-overlay.field-type-signature .signature-field.empty .empty-placeholder,
+.field-overlay.field-type-initials .signature-field.empty .empty-placeholder {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
 .field-overlay .signature-field {
   width: 100%;
   height: 100%;
@@ -554,11 +353,11 @@ const fieldsOnPageExport = fieldsOnPage;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--primary-rgb), 0.08);
-  box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.12);
-  border: 1px dashed rgba(var(--primary-rgb), 0.6);
-  border-radius: 4px;
-  color: rgba(var(--primary-rgb), 1);
+  background: var(--sk-color-bg-surface-subtle);
+  box-shadow: var(--sk-shadow-sm);
+  border: 1px dashed var(--sk-color-border-default);
+  border-radius: var(--sk-radius-sm);
+  color: var(--sk-color-text-primary);
   font-weight: 600;
   text-align: center;
   padding: 4px;
@@ -589,7 +388,7 @@ const fieldsOnPageExport = fieldsOnPage;
 }
 .empty-sig {
   font-size: 12px;
-  color: #888;
+  color: var(--sk-color-text-secondary);
 }
 .sig-actions button {
   margin-right: 6px;
@@ -606,9 +405,9 @@ const fieldsOnPageExport = fieldsOnPage;
   justify-content: center;
 }
 .modal {
-  background: #fff;
+  background: var(--sk-color-bg-surface);
   padding: 16px;
-  border-radius: 6px;
+  border-radius: var(--sk-radius-lg);
   min-width: 320px;
 }
 .modal-actions {
@@ -618,35 +417,35 @@ const fieldsOnPageExport = fieldsOnPage;
 }
 .modal-actions button {
   padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fff;
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-color-border-default);
+  background: var(--sk-color-bg-surface);
   cursor: pointer;
   font-weight: 600;
 }
 .modal-actions button.primary {
-  background: rgb(var(--primary-rgb, 11, 118, 209));
+  background: var(--sk-color-action-primary);
   color: #fff;
   border: none;
 }
 .choice-tabs button {
   padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: #fff;
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-color-border-default);
+  background: var(--sk-color-bg-surface);
   cursor: pointer;
-  color: #222;
+  color: var(--sk-color-text-primary);
 }
 .choice-tabs button.active {
-  background: rgb(var(--primary-rgb));
+  background: var(--sk-color-action-primary);
   color: #fff;
-  border-color: rgba(var(--primary-rgb), 0.9);
+  border-color: var(--sk-color-action-primary);
 }
 .choice-body input {
   width: 100%;
   padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #e6e6e6;
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-color-border-default);
   box-sizing: border-box;
   font-size: 14px;
 }
@@ -656,13 +455,13 @@ const fieldsOnPageExport = fieldsOnPage;
 .modal-preview canvas {
   width: 100%;
   height: auto;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--sk-color-border-default);
+  border-radius: var(--sk-radius-sm);
 }
 .modal-actions button.secondary {
   background: transparent;
-  color: #333;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: var(--sk-color-text-primary);
+  border: 1px solid var(--sk-color-border-default);
 }
 .modal-actions button:hover {
   transform: translateY(-1px);
@@ -671,12 +470,12 @@ const fieldsOnPageExport = fieldsOnPage;
   margin-top: 12px;
 }
 .errors {
-  color: #a00;
+  color: var(--sk-color-action-danger);
 }
 .integrity-banner {
-  background: #fffae6;
+  background: var(--sk-color-bg-surface-subtle);
   padding: 6px;
   margin-bottom: 8px;
-  border: 1px solid #f0e6b2;
+  border: 1px solid var(--sk-color-border-default);
 }
 </style>

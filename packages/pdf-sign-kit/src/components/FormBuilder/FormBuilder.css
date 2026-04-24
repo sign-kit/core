@@ -1,15 +1,8 @@
-:root{
-    --primary-color: #007bff;
-  --primary-rgb: 0,123,255;
-    --primary-color-light: #eaf6ff;
-    --border-color: #ddd;
-    --background-color: #f6f7fb;
-}
 .pdf-builder {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-family: var(--sk-font-family-sans);
 }
 .pdf-builder__toolbar {
   display: flex;
@@ -19,23 +12,23 @@
 .pdf-builder__viewer {
   position: relative;
   overflow: auto;
-  background: #f6f7fb;
+  background: var(--sk-color-bg-surface-subtle);
   padding: 16px;
   flex: 1;
   max-width: 100%;
   overflow: auto;
 }
 .pdf-builder__content { display: flex; gap: 16px; align-items: flex-start; }
-.pdf-builder__bank { width: 180px; padding: 12px; background: #fff; border-left: 1px solid #eee; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.pdf-builder__bank { width: 180px; padding: 12px; background: var(--sk-color-bg-surface); border-left: 1px solid var(--sk-color-border-default); border-radius: var(--sk-radius-md); box-shadow: var(--sk-shadow-sm); }
 .pdf-builder__bank h4 { margin: 0 0 8px 0; font-size: 14px; }
 .bank-list { display:flex; flex-direction:column; gap:8px; }
-.bank-item { padding: 8px 10px; border: 1px solid #ddd; border-radius:6px; cursor:grab; user-select:none; background: #fafafa; }
-.bank-item.active { background:#eaf6ff; border-color:#9fd2ff; }
-.bank-hint { margin-top:12px; font-size:12px; color:#666; }
+.bank-item { padding: 8px 10px; border: 1px solid var(--sk-color-border-default); border-radius:var(--sk-radius-sm); cursor:grab; user-select:none; background: var(--sk-color-bg-surface-subtle); }
+.bank-item.active { background: rgba(78,205,196,0.08); border-color: var(--sk-color-action-primary); }
+.bank-hint { margin-top:12px; font-size:12px; color:var(--sk-color-text-secondary); }
 .pdf-page {
   position: relative;
   margin: 12px auto;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  box-shadow: var(--sk-shadow-sm);
 }
 .pdf-canvas {
   display: block;
@@ -56,9 +49,9 @@
 
 .field-box {
   position: absolute;
-  border: 1px solid rgba(var(--primary-rgb), 0.45);
-  background: var(--primary-color-light);
-  border-radius: 6px;
+  border: var(--sk-field-border-width) solid var(--sk-color-border-default);
+  background: var(--sk-color-bg-surface-subtle);
+  border-radius: var(--sk-radius-sm);
   box-sizing: border-box;
   pointer-events: auto;
   display: flex;
@@ -69,14 +62,14 @@
 .field-box .label {
   padding: 0;
   font-size: 12px;
-  color: rgba(0,0,0,0.85);
+  color: var(--sk-color-text-primary);
   font-weight: 600;
 }
 .field-box, .field-box .label { user-select: none; -webkit-user-select: none; -ms-user-select: none; }
 .field-handle {
   width: 10px;
   height: 10px;
-  background: rgba(0,0,0,0.6);
+  background: var(--sk-color-field-hover);
   position: absolute;
   border-radius: 2px;
 }
@@ -88,23 +81,33 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #e5534b;
-  color: #fff;
+  background: var(--sk-color-action-danger);
+  color: var(--sk-color-on-action);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  box-shadow: var(--sk-shadow-sm);
+}
+.field-box.field-type-signature,
+.field-box.field-type-initials {
+  border-color: var(--sk-field-accent);
+  background: var(--sk-field-accent-rgba);
+}
+
+.field-box.field-type-signature .label,
+.field-box.field-type-initials .label {
+  color: var(--sk-color-jet-black);
 }
 .field-box.dragging { box-shadow: 0 6px 20px rgba(0,0,0,0.12); transform-origin: 0 0; }
 
 /* drag preview used when dragging from the bank */
 .bank-drag-preview {
-  border: 1px solid rgba(var(--primary-rgb), 0.45);
-  background: var(--primary-color-light);
-  border-radius: 6px;
+  border: 1px solid var(--sk-color-border-default);
+  background: var(--sk-color-bg-surface-subtle);
+  border-radius: var(--sk-radius-sm);
   padding: 4px 8px;
   box-sizing: border-box;
   display: flex;
@@ -115,7 +118,7 @@
 .bank-drag-preview .bank-preview-label {
   font-weight: 600;
   font-size: 12px;
-  color: rgba(0,0,0,0.85);
+  color: var(--sk-color-text-primary);
 }
 .bank-drag-preview .bank-preview-delete {
   position: absolute;
@@ -124,8 +127,8 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #e5534b;
-  color: #fff;
+  background: var(--sk-color-action-danger);
+  color: var(--sk-color-on-action);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,6 +140,6 @@
   bottom: 6px;
   width: 10px;
   height: 10px;
-  background: rgba(0,0,0,0.6);
+  background: var(--sk-color-field-hover);
   border-radius: 2px;
 }

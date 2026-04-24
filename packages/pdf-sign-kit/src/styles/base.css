@@ -1,0 +1,11 @@
+@import './tokens.css';
+
+:root { font-family: var(--sk-font-family-sans); }
+
+html,body{height:100%;margin:0;background:var(--sk-color-bg-app);color:var(--sk-color-text-primary)}
+
+.sk-card{background:var(--sk-color-bg-surface);border:1px solid var(--sk-color-border-default);border-radius:var(--sk-radius-lg);box-shadow:var(--sk-shadow-md);padding:16px}
+.sk-panel{background:var(--sk-color-bg-surface-subtle);border-radius:var(--sk-radius-lg);padding:12px}
+.sk-toolbar{display:flex;align-items:center;gap:12px;padding:8px}
+
+.sk-badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;background:rgba(0,0,0,0.04)}

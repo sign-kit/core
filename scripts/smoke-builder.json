@@ -1,0 +1,30 @@
+{
+  "title": "SignKit.dev — Open source PDF signing for developers",
+  "url": "/builder",
+  "canvases": [
+    {
+      "w": 612,
+      "h": 792,
+      "visible": true
+    }
+  ],
+  "overlays": [
+    {
+      "children": 0,
+      "rect": {
+        "x": 337,
+        "y": 318.6875,
+        "width": 612,
+        "height": 792,
+        "top": 318.6875,
+        "right": 949,
+        "bottom": 1110.6875,
+        "left": 337
+      }
+    }
+  ],
+  "fields": [],
+  "fieldOverlays": [],
+  "viewer": "<div data-v-853962b3=\"\" class=\"pdf-builder__viewer\"><div data-v-853962b3=\"\" class=\"pdf-page\" style=\"width: 612px;\"><canvas data-v-853962b3=\"\" class=\"pdf-canvas\" width=\"612\" height=\"792\"></canvas><div data-v-853962b3=\"\" class=\"overlay\" style=\"width: 612px; height: 792px;\"></div></div></div>",
+  "viewerCount": true
+}

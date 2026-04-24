@@ -1,0 +1,4 @@
+@import './tokens.css';
+
+.sk-side{display:flex;flex-direction:column;gap:8px;background:var(--sk-color-bg-surface);border:1px solid var(--sk-color-border-default);padding:12px;border-radius:var(--sk-radius-lg)}
+.sk-field-list{display:flex;flex-direction:column;gap:8px}

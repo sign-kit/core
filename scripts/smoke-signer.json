@@ -1,0 +1,59 @@
+{
+  "title": "SignKit.dev — Open source PDF signing for developers",
+  "url": "/signer",
+  "canvases": [
+    {
+      "w": 612,
+      "h": 792,
+      "visible": true
+    }
+  ],
+  "overlays": [
+    {
+      "children": 2,
+      "rect": {
+        "x": 347,
+        "y": 207.6875,
+        "width": 612,
+        "height": 792,
+        "top": 207.6875,
+        "right": 959,
+        "bottom": 999.6875,
+        "left": 347
+      }
+    }
+  ],
+  "fields": [],
+  "fieldOverlays": [
+    {
+      "html": "<div data-v-d1a019fe=\"\" class=\"field-overlay field-type-current_date\" style=\"left: 244.5px; top: 415.312px; width: 97px; height: 30px;\"><div data-v-0cce5433=\"\" data-v-d1a019fe=\"\"><input data-v-0cce5433=\"\" type=\"date\" value=\"2026-04-24\"></div></div>",
+      "style": "left: 244.5px; top: 415.312px; width: 97px; height: 30px;",
+      "rect": {
+        "x": 591.5,
+        "y": 623,
+        "width": 97,
+        "height": 30,
+        "top": 623,
+        "right": 688.5,
+        "bottom": 653,
+        "left": 591.5
+      }
+    },
+    {
+      "html": "<div data-v-d1a019fe=\"\" class=\"field-overlay field-type-signature\" style=\"left: 365.5px; top: 417.812px; width: 202.5px; height: 28.5px;\"><div data-v-0cce5433=\"\" data-v-d1a019fe=\"\"><div data-v-0cce5433=\"\" class=\"signature-field empty\" role=\"button\"><div data-v-0cce5433=\"\" class=\"empty-placeholder\">No signature</div></div></div></div>",
+      "style": "left: 365.5px; top: 417.812px; width: 202.5px; height: 28.5px;",
+      "rect": {
+        "x": 712.5,
+        "y": 625.5,
+        "width": 202.5,
+        "height": 28.5,
+        "top": 625.5,
+        "right": 915,
+        "bottom": 654,
+        "left": 712.5
+      }
+    }
+  ],
+  "viewer": null,
+  "viewerCount": false
+}

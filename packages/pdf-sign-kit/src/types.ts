@@ -87,12 +87,33 @@ export interface PageSize {
   unit?: 'pt' | 'px' | 'mm' | string;
 }
 
+export interface PdfSource {
+  type: 'url' | 'document-store' | 'file-name' | 'custom' | string;
+  value: string;
+  label?: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface PdfInfo {
+  source?: PdfSource;
+  fingerprint?: string;
+  hash?: {
+    algorithm: 'SHA-256' | string;
+    encoding: 'base64url' | 'hex' | string;
+    value: string;
+  } | null;
+  pageCount?: number;
+  pages?: Array<{ page: number; width: number; height: number; rotation?: number }>;
+}
+
 export interface Template {
   id: string;
   version: string; // semver-like '1.0.0'
   title?: string;
-  pdfHash?: string | null; // optional fingerprint placeholder
-  pages: PageSize[];
+  // New `pdf` root for template-level PDF metadata (backwards-compatible with `pages` below)
+  pdf?: PdfInfo;
+  pdfHash?: string | null; // optional fingerprint placeholder (legacy)
+  pages: PageSize[]; // legacy/top-level pages array (kept for compatibility)
   fields: Field[];
   meta?: Record<string, unknown>;
   createdAt: string;
@@ -123,15 +144,17 @@ export interface Manifest {
     valuesHash?: string;
     ok: boolean;
     verdict?: 'pass' | 'warn' | 'fail';
-    details?: {
-      checks?: Array<{
-        name: string;
-        result: 'match' | 'mismatch';
-        expected?: string;
-        actual?: string;
-        details?: Record<string, unknown>;
-      }>;
-    } | Record<string, unknown>;
+    details?:
+      | {
+          checks?: Array<{
+            name: string;
+            result: 'match' | 'mismatch';
+            expected?: string;
+            actual?: string;
+            details?: Record<string, unknown>;
+          }>;
+        }
+      | Record<string, unknown>;
   };
   // session-level canonical hash combining pdfHash, templateHash and valuesHash
   sessionHash?: string;

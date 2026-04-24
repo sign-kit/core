@@ -1,0 +1,5 @@
+@import './tokens.css';
+
+.sk-input{width:100%;padding:8px;border-radius:var(--sk-radius-sm);border:1px solid var(--sk-color-border-default);box-sizing:border-box}
+.sk-input:focus{outline:none;box-shadow:0 0 0 var(--sk-focus-ring-width) var(--sk-focus-ring-color);border-color:var(--sk-color-border-focus)}
+.sk-label{font-size:13px;color:var(--sk-color-text-secondary);display:block;margin-bottom:6px}

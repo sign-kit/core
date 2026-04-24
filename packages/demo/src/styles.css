@@ -27,7 +27,7 @@
 body{font-family:var(--font-family-sans, Inter, system-ui);margin:0;background:var(--color-bg-app)}
 input,textarea,select{font-family:inherit}
 button{background:var(--color-action-primary);color:#fff;border:none;padding:8px 10px;border-radius:6px;cursor:pointer}
-button.secondary{background:var(--color-action-secondary)}
+button.secondary{background:var(--color-action-secondary); color:var(--color-on-action-secondary)}
 
 /* small responsive tweaks */
 @media(max-width:900px){.demo-main{grid-template-columns:1fr;}.demo-inspect{order:3}.demo-sidebar{order:1}.demo-content{order:2}}
@@ -39,4 +39,11 @@ button.secondary{background:var(--color-action-secondary)}
     box-shadow: var(--shadow-md);
     padding: var(--space-4);
     
+}
+
+/* Demo theme override example (shows how to override SignKit tokens) */
+.demo-purple-theme{
+  --sk-color-action-primary: #7c3aed;
+  --sk-color-action-secondary: #2563eb;
+  --sk-radius-md: 8px;
 }

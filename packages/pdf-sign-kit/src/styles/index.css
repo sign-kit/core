@@ -1,0 +1,9 @@
+@import './tokens.css';
+@import './base.css';
+@import './buttons.css';
+@import './forms.css';
+@import './panels.css';
+@import './overlays.css';
+
+/* Combined SignKit stylesheet entrypoint. Import this in consuming apps: */
+/* import '../pdf-sign-kit/src/styles/index.css' */

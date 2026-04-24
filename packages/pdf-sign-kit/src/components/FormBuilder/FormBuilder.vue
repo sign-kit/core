@@ -2,67 +2,48 @@
   <div class="pdf-builder">
     <div class="pdf-builder__toolbar">
       <slot name="toolbar">
-        <div class="toolbar-left">
-          <button @click="zoomIn">Zoom +</button>
-          <button @click="zoomOut">Zoom -</button>
-          <button @click="exportTemplateAction">Export</button>
-        </div>
+        <BuilderToolbar @zoom-in="zoomIn" @zoom-out="zoomOut" @export="exportTemplateAction" />
       </slot>
     </div>
 
     <div class="pdf-builder__content">
-      <div class="pdf-builder__viewer" ref="viewerRef">
-        <div v-for="(size, idx) in pageSizes" :key="idx" class="pdf-page" :style="pageStyle(size)">
-          <canvas :ref="setCanvasRef(idx)" class="pdf-canvas"></canvas>
-          <div
-            class="overlay"
-            :style="overlayStyle(size)"
-            @dragover.prevent
-            @drop.stop.prevent="onDrop($event, idx)"
-            :ref="(el) => setOverlayRef(el, idx)"
-          >
-            <FieldBox
-              v-for="f in fieldsOnPage(idx)"
-              :key="f.id"
-              :field="f"
-              :pageSize="size"
-              :scale="scale"
-              @update-field="onUpdateField"
-              @delete-field="onDeleteField"
-              @drag-end="onFieldDragEnd"
-            />
-          </div>
-        </div>
-      </div>
+      <PdfCanvas
+        :pageSizes="pageSizes"
+        :scale="scale"
+        :setCanvasRef="setCanvasRef"
+        :setOverlayRef="setOverlayRef"
+        :fieldsOnPage="fieldsOnPage"
+        :onDrop="onDrop"
+        :onUpdateField="onUpdateField"
+        :onDeleteField="onDeleteField"
+        :onFieldDragEnd="onFieldDragEnd"
+        :onSelect="onFieldSelect"
+      />
 
-      <aside class="pdf-builder__bank">
-        <h4>Fields</h4>
-        <div class="bank-list">
-          <div
-            v-for="t in fieldTypes"
-            :key="t"
-            class="bank-item"
-            draggable="true"
-            @dragstart="onDragStart($event, t)"
-            @click="setActiveType(t)"
-            :class="{ active: activeType === t }"
-          >
-            {{ t }}
-          </div>
-        </div>
-        <div class="bank-hint">Drag a field onto the page to add it.</div>
-      </aside>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <FieldPalette
+          :fieldTypes="fieldTypes"
+          :activeType="activeType"
+          @drag-start="onDragStart"
+          @set-active="setActiveType"
+        />
+        <FieldInspector v-if="selectedField" :field="selectedField" @update-field="onUpdateField" @delete-field="onDeleteField" />
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, computed } from 'vue';
 import type { Template, Field, PageSize } from '../../types';
-import FieldBox from './FieldBox.vue';
+import PdfCanvas from './PdfCanvas.vue';
+import FieldPalette from './FieldPalette.vue';
+import BuilderToolbar from './BuilderToolbar.vue';
+import FieldInspector from './FieldInspector.vue';
 import { usePdfjs } from '../../composables/usePdfjs';
 import { useTemplate } from '../../composables/useTemplate';
-import { pixelsToNormalized, normalizedToPixels } from '../../utils/coord';
+import { pixelsToNormalized } from '../../utils/coord';
+import { ensurePdfRoot } from '../../utils/template';
 
 // v-model: template (use defineModel for two-way binding)
 const model = defineModel<Template | null>();
@@ -84,23 +65,17 @@ const canvasRefs = ref<Array<HTMLCanvasElement | null>>([]);
 const overlayRefs = ref<Array<HTMLElement | null>>([]);
 
 const pdfSource = ref(props.pdf ?? null);
+console.debug('[FormBuilder] initial props.pdf ->', props.pdf);
 const { pdfDoc, numPages, pageSizes, loading, renderPage } = usePdfjs(pdfSource as any);
+
+watch(loading, (v) => console.debug('[FormBuilder] pdf loading ->', v));
 
 const { template, setPages, addField, updateField, removeField, exportTemplate } = useTemplate(
   model.value ?? null,
 );
 
 const scale = ref(props.initialZoom ?? 1);
-const fieldTypes = [
-  'signature',
-  'initials',
-  'text',
-  'date',
-  'current_date',
-  'checkbox',
-  'name',
-  'email',
-];
+const fieldTypes = ['signature', 'initials', 'text', 'date', 'current_date', 'checkbox', 'name', 'email'];
 const activeType = ref<Field['type']>(fieldTypes[0]);
 
 const defaultSizes: Record<string, { w: number; h: number }> = {
@@ -114,7 +89,15 @@ const defaultSizes: Record<string, { w: number; h: number }> = {
   email: { w: 0.22, h: 0.05 },
 };
 
+const selectedFieldId = ref<string | null>(null);
+const selectedField = computed(() => template.value.fields.find((f) => f.id === selectedFieldId.value) || null);
+
 watch(pageSizes, (sizes) => {
+  try {
+    console.debug('[FormBuilder] pageSizes -> length=', (sizes && sizes.length) || (sizes && sizes.value && sizes.value.length) || 0);
+  } catch (e) {
+    console.debug('[FormBuilder] pageSizes -> (unable to read length)');
+  }
   setPages(sizes as PageSize[]);
   // render pages after DOM update
   nextTick(() => renderAll());
@@ -123,6 +106,52 @@ watch(pageSizes, (sizes) => {
 watch(scale, () => {
   nextTick(() => renderAll());
 });
+
+// if parent provides a pdf source (url/file), populate template.pdf.source for metadata
+watch(
+  () => props.pdf,
+  async (p) => {
+    console.debug('[FormBuilder] props.pdf changed ->', p);
+    // update internal pdfSource used by usePdfjs so it reloads when parent changes
+    if (!p) return;
+    try {
+      if (typeof p === 'string') {
+        // prefer loading the PDF into an ArrayBuffer to avoid worker/cors issues
+        try {
+          const r = await fetch(p);
+          if (r.ok) {
+            const buf = await r.arrayBuffer();
+            pdfSource.value = buf as any;
+            (template.value.pdf as any).source = { type: 'url', value: p };
+          } else {
+            pdfSource.value = p as any;
+            (template.value.pdf as any).source = { type: 'url', value: p };
+          }
+        } catch (e) {
+          // fallback to URL if fetch fails
+          pdfSource.value = p as any;
+          (template.value.pdf as any).source = { type: 'url', value: p };
+        }
+      } else if (p instanceof File) {
+        try {
+          const ab = await p.arrayBuffer();
+          pdfSource.value = ab as any;
+        } catch (e) {
+          pdfSource.value = p as any;
+        }
+        (template.value.pdf as any).source = { type: 'file-name', value: p.name || '' };
+      } else {
+        pdfSource.value = p as any;
+      }
+      // ensure pdf root exists
+      ensurePdfRoot(template.value as any);
+      // propagate back to model
+      model.value = exportTemplate();
+    } catch (e) {
+      console.error('[FormBuilder] failed to handle props.pdf change', e);
+    }
+  },
+);
 
 function setCanvasRef(idx: number) {
   return (el: HTMLCanvasElement | null) => {
@@ -211,6 +240,10 @@ function setActiveType(t: Field['type']) {
   activeType.value = t;
 }
 
+function onFieldSelect(id: string) {
+  selectedFieldId.value = id;
+}
+
 function onDrop(ev: DragEvent, pageIndex: number) {
   const type = ev.dataTransfer?.getData('text/plain') || activeType.value;
   const overlay = overlayRefs.value[pageIndex];
@@ -222,8 +255,7 @@ function onDrop(ev: DragEvent, pageIndex: number) {
   if (!pageSize) return;
   // compute preview size the same way the bank drag preview was created
   const def = defaultSizes[type] || { w: 0.18, h: 0.05 };
-  const basePage =
-    pageSizes.value && pageSizes.value[0] ? pageSizes.value[0].width : pageSize.width;
+  const basePage = pageSizes.value && pageSizes.value[0] ? pageSizes.value[0].width : pageSize.width;
   const previewW = Math.max(48, Math.floor(def.w * basePage * (scale.value || 1)));
   const previewH = Math.max(28, Math.floor(def.h * basePage * (scale.value || 1)));
   const pxW = pageSize.width * scale.value;
@@ -257,13 +289,15 @@ function onUpdateField(patch: Partial<Field> & { id: string }) {
   updateField(patch.id, patch as Partial<Field>);
   const f = template.value.fields.find((x) => x.id === patch.id)!;
   emit('field-updated', f);
-  // note: do not emit whole-model updates on every pointermove — emit on drag-end to avoid layout thrash
+  // keep inspector selection synced when updates come from inspector
+  selectedFieldId.value = patch.id;
 }
 
 function onDeleteField(id: string) {
   removeField(id);
   emit('field-removed', id);
   model.value = exportTemplate();
+  if (selectedFieldId.value === id) selectedFieldId.value = null;
 }
 
 function onFieldDragEnd(id: string) {
@@ -284,7 +318,6 @@ function exportTemplateAction() {
   model.value = exportTemplate();
 }
 
-// watch incoming v-model
 // watch incoming v-model
 watch(
   () => model.value,

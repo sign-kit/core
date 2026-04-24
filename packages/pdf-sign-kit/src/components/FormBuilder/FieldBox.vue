@@ -1,5 +1,5 @@
 <template>
-  <div class="field-box" :style="style" @pointerdown.stop="onPointerDown" ref="root">
+  <div :class="['field-box','sk-field-box', `field-type-${field.type}`]" :style="style" @pointerdown.stop="onPointerDown" ref="root">
     <div class="label" ref="labelRef">{{ field.label || field.type }}</div>
     <button class="field-delete" ref="deleteRef" @click.stop="onDelete">✕</button>
     <div class="field-handle br" @pointerdown.stop.prevent="onResizeDown"></div>
@@ -19,6 +19,7 @@ const emit = defineEmits<{
   (e: 'update-field', payload: Partial<Field> & { id: string }): void;
   (e: 'delete-field', id: string): void;
   (e: 'drag-end', id: string): void;
+  (e: 'select', id: string): void;
 }>();
 
 const root = ref<HTMLElement | null>(null);
@@ -49,6 +50,11 @@ function onPointerDown(e: PointerEvent) {
   const overlayEl = root.value?.parentElement as HTMLElement | null;
   if (!overlayEl || !root.value) return;
   const target = e.target as HTMLElement | null;
+  // emit select so consumers can show an inspector
+  try {
+    emit('select', props.field.id);
+  } catch (err) {}
+
   // If the pointerdown started on the delete button or resize handle, don't start a drag here.
   if (
     target &&
