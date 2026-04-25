@@ -4,25 +4,40 @@
     <div class="instructions">
       <h3>How to use:</h3>
       <ol>
+        <li><strong>Enter signer information</strong> (name, email) in the left panel.</li>
         <li>
-          <strong>Enter signer information</strong> (name, email) in the left panel.
-        </li>
-        <li>
-          <strong>Fill in all form fields</strong> on the PDF pages below. Click signature fields to draw or type your signature.
+          <strong>Fill in all form fields</strong> on the PDF pages below. Click signature fields to
+          draw or type your signature.
         </li>
         <li>
           <strong>Choose a signing mode:</strong>
-          <ul style="margin: 4px 0; margin-left: 20px;">
-            <li><strong>Standard:</strong> Basic signing with fields. No integrity verification.</li>
-            <li><strong>Integrity:</strong> Adds hash checks to verify template and PDF weren't modified.</li>
+          <ul style="margin: 4px 0; margin-left: 20px">
+            <li>
+              <strong>Standard:</strong> Basic signing with fields. No integrity verification.
+            </li>
+            <li>
+              <strong>Integrity:</strong> Adds hash checks to verify template and PDF weren't
+              modified.
+            </li>
           </ul>
         </li>
         <li>
-          <strong>Click "Finalize & Download"</strong> to generate a signed PDF and manifest JSON with all field values and metadata.
+          <strong>Click "Finalize & Download"</strong> to generate a signed PDF and manifest JSON
+          with all field values and metadata.
         </li>
       </ol>
-      <p style="margin-top: 8px; padding: 6px 8px; background: rgba(67, 129, 193, 0.08); border-radius: 4px; font-size: 12px; color: var(--color-text-primary)">
-        Watch the <strong>Events & Manifest</strong> panel on the right to see what happens during signing.
+      <p
+        style="
+          margin-top: 8px;
+          padding: 6px 8px;
+          background: rgba(67, 129, 193, 0.08);
+          border-radius: 4px;
+          font-size: 12px;
+          color: var(--color-text-primary);
+        "
+      >
+        Watch the <strong>Events & Manifest</strong> panel on the right to see what happens during
+        signing.
       </p>
     </div>
 

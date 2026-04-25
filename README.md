@@ -24,11 +24,11 @@ npm run dev:docs
 
 Repository layout
 
-- `packages/pdf-sign-kit` — library source (TypeScript) and public API
-- `packages/demo` — minimal Vite + Vue demo app
-- `packages/docs` — VitePress documentation site
-- `samples/` — place sample PDFs here for demo
-- `AGENTS.md` — guidance for coding agents (automated contributors)
+- `packages/pdf-sign-kit` - library source (TypeScript) and public API
+- `packages/demo` - minimal Vite + Vue demo app
+- `packages/docs` - VitePress documentation site
+- `samples/` - place sample PDFs here for demo
+- `AGENTS.md` - guidance for coding agents (automated contributors)
 
 Rationale
 

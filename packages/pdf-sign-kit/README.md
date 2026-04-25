@@ -1,4 +1,4 @@
-# @sign-kit/core — Styling & Theming
+# @sign-kit/core - Styling & Theming
 
 This package exposes CSS design tokens and shared styles so consumers can easily customize the look and feel.
 

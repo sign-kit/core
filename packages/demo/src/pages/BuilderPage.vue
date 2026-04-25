@@ -5,19 +5,32 @@
       <h3>How to use:</h3>
       <ol>
         <li>
-          <strong>Click on the PDF pages</strong> to place new fields (text, signature, date, checkbox, email, name).
+          <strong>Click on the PDF pages</strong> to place new fields (text, signature, date,
+          checkbox, email, name).
         </li>
         <li>
-          <strong>Drag to move</strong> fields around the page. <strong>Drag the corner handle</strong> to resize.
+          <strong>Drag to move</strong> fields around the page.
+          <strong>Drag the corner handle</strong> to resize.
         </li>
         <li>
-          <strong>Inspect fields</strong> on the right to edit labels, set required/readonly, and configure validation.
+          <strong>Inspect fields</strong> on the right to edit labels, set required/readonly, and
+          configure validation.
         </li>
         <li>
-          <strong>Export the template JSON</strong> below, then use it in the <router-link to="/signer">Signer</router-link> to let users fill and sign.
+          <strong>Export the template JSON</strong> below, then use it in the
+          <router-link to="/signer">Signer</router-link> to let users fill and sign.
         </li>
       </ol>
-      <p style="margin-top: 8px; padding: 6px 8px; background: rgba(67, 129, 193, 0.08); border-radius: 4px; font-size: 12px; color: var(--color-text-primary)">
+      <p
+        style="
+          margin-top: 8px;
+          padding: 6px 8px;
+          background: rgba(67, 129, 193, 0.08);
+          border-radius: 4px;
+          font-size: 12px;
+          color: var(--color-text-primary);
+        "
+      >
         Tip: The same template JSON can be imported here for editing later.
       </p>
     </div>

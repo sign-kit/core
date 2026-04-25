@@ -4,34 +4,54 @@
     <div class="instructions">
       <h3>What is integrity checking?</h3>
       <p>
-        Integrity checking uses hash values to verify that PDFs and templates haven't been modified. This is <strong>optional</strong> and works client-side only.
+        Integrity checking uses hash values to verify that PDFs and templates haven't been modified.
+        This is <strong>optional</strong> and works client-side only.
       </p>
       <h3>How to use this demo:</h3>
       <ol>
         <li>
-          <strong>Compute hashes</strong> from a PDF and template. This creates SHA-256 hashes of the PDF file and template structure.
+          <strong>Compute hashes</strong> from a PDF and template. This creates SHA-256 hashes of
+          the PDF file and template structure.
+        </li>
+        <li><strong>Save or send the hashes</strong> to your users as expected values.</li>
+        <li>
+          <strong>During signing,</strong> paste the expected hashes in the left sidebar on the
+          Signer page and select <strong>integrity</strong> mode.
         </li>
         <li>
-          <strong>Save or send the hashes</strong> to your users as expected values.
-        </li>
-        <li>
-          <strong>During signing,</strong> paste the expected hashes in the left sidebar on the Signer page and select <strong>integrity</strong> mode.
-        </li>
-        <li>
-          <strong>The signer app will verify</strong> that the PDF and template match the expected hashes before allowing finalization.
+          <strong>The signer app will verify</strong> that the PDF and template match the expected
+          hashes before allowing finalization.
         </li>
       </ol>
-      <p style="margin-top: 8px; padding: 6px 8px; background: rgba(233, 174, 0, 0.08); border-radius: 4px; font-size: 12px; color: var(--color-text-primary)">
-        <strong>Note:</strong> Hash verification does NOT provide cryptographic signatures or legal proof. It only checks that files match expected values.
+      <p
+        style="
+          margin-top: 8px;
+          padding: 6px 8px;
+          background: rgba(233, 174, 0, 0.08);
+          border-radius: 4px;
+          font-size: 12px;
+          color: var(--color-text-primary);
+        "
+      >
+        <strong>Note:</strong> Hash verification does NOT provide cryptographic signatures or legal
+        proof. It only checks that files match expected values.
       </p>
     </div>
 
     <div class="form cardify">
       <h4>Compute Hashes</h4>
       <p style="margin-top: 0; margin-bottom: 8px; font-size: 12px; color: var(--color-text-muted)">
-        The template below is auto-populated from the Builder. The PDF is loaded from the PDF Source in the left panel. Edit the template or load a sample to compare.
+        The template below is auto-populated from the Builder. The PDF is loaded from the PDF Source
+        in the left panel. Edit the template or load a sample to compare.
       </p>
-      <label>Template JSON <textarea v-model="templateJson" rows="8" placeholder="Load from Builder or paste template JSON"></textarea></label>
+      <label
+        >Template JSON
+        <textarea
+          v-model="templateJson"
+          rows="8"
+          placeholder="Load from Builder or paste template JSON"
+        ></textarea>
+      </label>
       <div class="row">
         <button @click="computeHashes">Compute Hashes</button>
         <button @click="loadSampleTemplate">Load Sample Template</button>
@@ -48,12 +68,16 @@
       <div class="hash-row">
         <div class="hash-label">Template Hash:</div>
         <code class="hash-value" :title="templateHash">{{ templateHash }}</code>
-        <button class="copy-btn" @click="copyToClipboard(templateHash, 'Template hash copied')">Copy</button>
+        <button class="copy-btn" @click="copyToClipboard(templateHash, 'Template hash copied')">
+          Copy
+        </button>
       </div>
       <div class="hash-row">
         <div class="hash-label">Values Hash (empty):</div>
         <code class="hash-value" :title="valuesHash">{{ valuesHash }}</code>
-        <button class="copy-btn" @click="copyToClipboard(valuesHash, 'Values hash copied')">Copy</button>
+        <button class="copy-btn" @click="copyToClipboard(valuesHash, 'Values hash copied')">
+          Copy
+        </button>
       </div>
 
       <h4 style="margin-top: 20px; margin-bottom: 12px">Verify Against Expected Hashes</h4>
@@ -63,24 +87,53 @@
       <div class="verify-grid">
         <div class="verify-item">
           <label class="verify-label">Expected PDF Hash</label>
-          <input v-model="expectedPdf" class="verify-input" placeholder="Paste PDF hash to verify" />
-          <div v-if="expectedPdf" class="verify-status" :class="{ match: expectedPdf === pdfHash, mismatch: expectedPdf !== pdfHash }">
+          <input
+            v-model="expectedPdf"
+            class="verify-input"
+            placeholder="Paste PDF hash to verify"
+          />
+          <div
+            v-if="expectedPdf"
+            class="verify-status"
+            :class="{ match: expectedPdf === pdfHash, mismatch: expectedPdf !== pdfHash }"
+          >
             {{ expectedPdf === pdfHash ? 'Matches' : 'Does not match' }}
           </div>
         </div>
         <div class="verify-item">
           <label class="verify-label">Expected Template Hash</label>
-          <input v-model="expectedTemplate" class="verify-input" placeholder="Paste template hash to verify" />
-          <div v-if="expectedTemplate" class="verify-status" :class="{ match: expectedTemplate === templateHash, mismatch: expectedTemplate !== templateHash }">
+          <input
+            v-model="expectedTemplate"
+            class="verify-input"
+            placeholder="Paste template hash to verify"
+          />
+          <div
+            v-if="expectedTemplate"
+            class="verify-status"
+            :class="{
+              match: expectedTemplate === templateHash,
+              mismatch: expectedTemplate !== templateHash,
+            }"
+          >
             {{ expectedTemplate === templateHash ? 'Matches' : 'Does not match' }}
           </div>
         </div>
       </div>
       <div style="margin-top: 16px">
-        <button @click="compareExpected" :disabled="!expectedPdf && !expectedTemplate">Compare All Hashes</button>
+        <button @click="compareExpected" :disabled="!expectedPdf && !expectedTemplate">
+          Compare All Hashes
+        </button>
       </div>
 
-      <div v-if="compareResult" style="margin-top: 16px; padding: 12px; background: var(--color-bg-surface-subtle, #f5f5f5); border-radius: 6px;">
+      <div
+        v-if="compareResult"
+        style="
+          margin-top: 16px;
+          padding: 12px;
+          background: var(--color-bg-surface-subtle, #f5f5f5);
+          border-radius: 6px;
+        "
+      >
         <h4 style="margin-top: 0">Comparison Result</h4>
         <pre>{{ JSON.stringify(compareResult, null, 2) }}</pre>
       </div>
@@ -106,15 +159,19 @@ const expectedTemplate = ref('');
 const compareResult = ref<any | null>(null);
 
 // Watch for template changes from Builder
-watch(() => currentTemplate?.value, (newVal) => {
-  if (newVal) {
-    try {
-      templateJson.value = JSON.stringify(newVal, null, 2);
-    } catch (e) {
-      // ignore
+watch(
+  () => currentTemplate?.value,
+  (newVal) => {
+    if (newVal) {
+      try {
+        templateJson.value = JSON.stringify(newVal, null, 2);
+      } catch (e) {
+        // ignore
+      }
     }
-  }
-}, { deep: true });
+  },
+  { deep: true },
+);
 
 function copyToClipboard(text: string | null, message: string) {
   if (!text) return;

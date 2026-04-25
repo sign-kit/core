@@ -7,3 +7,4 @@ packages/*/dist/
 .vscode/
 coverage/
 node_modules/
+docs/.vitepress/cache

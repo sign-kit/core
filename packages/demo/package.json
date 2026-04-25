@@ -1,11 +1,12 @@
 {
   "name": "demo",
   "version": "0.0.0",
+  "license": "Apache-2.0",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "npm --workspace=@sign-kit/core run build:types && vite preview"
   },
   "dependencies": {
     "vue": "^3.2",

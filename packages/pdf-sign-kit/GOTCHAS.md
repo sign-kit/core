@@ -1,4 +1,4 @@
-# pdf-sign-kit — Packaging & Runtime Gotchas
+# pdf-sign-kit - Packaging & Runtime Gotchas
 
 This document collects practical caveats and reminders for packaging the Vue components and web components, and for runtime behaviors you must not forget.
 
