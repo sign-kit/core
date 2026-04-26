@@ -3,6 +3,11 @@ name: Generate and Build Docs
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'packages/docs/**'
+      - '.github/workflows/generate-docs.yml'
+      - 'typedoc.json'
+      - 'packages/pdf-sign-kit/src/types.ts'
   pull_request:
     branches: [ master ]
 
@@ -45,7 +50,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: packages/docs/.vitepress/dist
-          
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
