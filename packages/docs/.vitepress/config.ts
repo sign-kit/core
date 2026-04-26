@@ -5,7 +5,7 @@ export default defineConfig({
   description: 'Client-first Vue 3 toolkit for building PDF signing experiences in the browser',
   lang: 'en-US',
 
-  head: [['link', { rel: 'icon', href: '/favicon.png' }]],
+  head: [['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }]],
 
   themeConfig: {
     siteTitle: false,
@@ -15,7 +15,7 @@ export default defineConfig({
     },
     logo: {
       src: '/logo-horizontal-dev.png',
-      width: 100,
+      height: 36,
       alt: '@sign-kit/core Logo',
     },
 
@@ -51,7 +51,7 @@ export default defineConfig({
           { text: 'Server Integration', link: '/integrity/server-integration' },
         ],
       },
-      { text: 'Demo Walkthrough', link: '/demo-walkthrough' },
+      { text: 'Demo', link: '/demo-walkthrough' },
       { text: 'FAQ', link: '/faq' },
       { text: 'Contributing', link: '/contributing' },
     ],

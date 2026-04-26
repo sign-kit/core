@@ -6,8 +6,8 @@ Thank you for considering contributing to `@sign-kit/core`! This guide covers de
 
 ### Prerequisites
 
-- Node.js 14+
-- npm or yarn
+- Node.js 20+
+- npm (the repo uses npm workspaces)
 - Git
 
 ### Development Setup
@@ -21,16 +21,21 @@ cd core
 npm install
 
 # Start the demo dev server
-npm run demo
+npm run dev:demo
 
-# Run tests
+# Start the docs site locally
+npm run dev:docs
+
+# Run unit tests (Vitest)
 npm test
 
-# Run linting and type checking
-npm run lint
-npm run type-check
+# Run Playwright e2e tests against the demo
+npm run test:e2e
 
-# Build library
+# Run linting
+npm run lint
+
+# Build the library
 npm run build
 ```
 
@@ -38,25 +43,33 @@ npm run build
 
 ```
 packages/
-  pdf-sign-kit/          # Main library
+  pdf-sign-kit/          # Publishable library (@sign-kit/core)
     src/
       components/        # Vue 3 components
       composables/       # Vue 3 composables
-      utils/            # Utilities (signing, templates, etc.)
-      styles/           # CSS tokens and base styles
-      types.ts          # TypeScript interfaces
-    test/               # Unit and integration tests
+      utils/             # Utilities (signing, templates, integrity)
+      styles/            # CSS tokens and base styles
+      web-components/    # Custom element wrappers
+      types.ts           # TypeScript interfaces
+    test/                # Vitest unit & integration tests
     package.json
-  
-  demo/                 # Interactive demo app
+
+  demo/                  # Interactive demo app
     src/
-      pages/            # Demo pages (Builder, Signer, Integrity)
+      pages/             # Builder, Signer, Integrity, WebComponents pages
       App.vue
     package.json
-  
-  docs/                 # VitePress documentation
-    docs/               # Markdown files
+
+  docs/                  # VitePress documentation site
+    *.md                 # Markdown pages (getting-started, api/, etc.)
     package.json
+
+tests/
+  e2e/                   # Playwright browser tests (run against the demo)
+    builder-signer.spec.ts
+    demo-routes.spec.ts
+    integrity.spec.ts
+    webcomponent-events.spec.ts
 ```
 
 ## Code Standards
@@ -148,186 +161,81 @@ export async function computeSha256(data: ArrayBuffer): Promise<string> {
 
 ## Testing
 
-### Unit Tests
+There are two layers of tests.
 
-Add tests for utility functions and composables:
+### Vitest unit tests
 
-```typescript
-// src/utils/__tests__/coord.test.ts
-import { describe, it, expect } from 'vitest'
-import { normalizeCoord, denormalizeCoord } from '../coord'
-
-describe('coord utilities', () => {
-  it('normalizes coordinates 0-1 range', () => {
-    expect(normalizeCoord(150, 300)).toBe(0.5)
-  })
-
-  it('denormalizes back to pixels', () => {
-    expect(denormalizeCoord(0.5, 300)).toBe(150)
-  })
-})
-```
-
-### Component Tests
-
-Test Vue components using `@testing-library/vue`:
-
-```typescript
-// src/components/__tests__/FormBuilder.test.ts
-import { render, screen } from '@testing-library/vue'
-import FormBuilder from '../FormBuilder.vue'
-
-describe('FormBuilder', () => {
-  it('renders PDF canvas', () => {
-    render(FormBuilder, {
-      props: { pdf: '/sample.pdf', modelValue: defaultTemplate },
-    })
-    expect(screen.getByRole('region')).toBeInTheDocument()
-  })
-})
-```
-
-### Integration Tests
-
-Test end-to-end workflows:
-
-```typescript
-// test/signer.integration.test.ts
-it('signs PDF and generates manifest', async () => {
-  const pdfBytes = await loadPdf('/sample.pdf')
-  const template = defaultTemplate
-  const values = [{ id: 'f1', value: 'Test' }]
-
-  const { signedPdfBytes, manifest } = await applyValuesToPdf(
-    pdfBytes,
-    template,
-    values
-  )
-
-  expect(signedPdfBytes).toBeTruthy()
-  expect(manifest.values).toEqual(values)
-})
-```
-
-### Running Tests
+Live in `packages/pdf-sign-kit/test/`. Run them with:
 
 ```bash
-npm test                  # Run all tests
-npm test -- --watch      # Watch mode
-npm test -- --coverage   # Coverage report
+npm test
 ```
 
-### Test Coverage
+The three test files cover:
 
-Aim for:
-- **Utilities**: 90%+ coverage
-- **Components**: 80%+ coverage for critical paths
-- **Composables**: 85%+ coverage
+- **`utils.test.ts`** — integrity utilities: `canonicalizeTemplate`, `computePdfHash`, `computeValuesHash`
+- **`template.test.ts`** — template helpers: `ensurePdfRoot`, `migratePdfSourceFromLegacy`
+- **`finalize.test.ts`** — the full finalize flow: loads `sample.pdf` from disk, calls `useSignerManager`, and asserts the returned manifest has the expected shape
+
+When adding a utility or composable, add a test in `packages/pdf-sign-kit/test/`. Keep tests focused — one `describe` block per module is fine.
+
+### Playwright e2e tests
+
+Live in `tests/e2e/` at the repo root and run against the locally served demo. Playwright spins up a dev server automatically (see `playwright.config.ts`).
+
+```bash
+# Build the web component bundle, then run all tests headlessly
+npm run test:e2e
+
+# Skip the WC build (faster on repeat runs)
+npm run test:e2e:skip-build
+
+# Open the Playwright interactive UI
+npm run test:e2e:ui
+```
+
+The four spec files test:
+
+- **`builder-signer.spec.ts`** — Builder renders with the sample PDF; Signer finalizes and emits a valid manifest
+- **`demo-routes.spec.ts`** — all demo routes load without errors
+- **`integrity.spec.ts`** — the integrity-verification event fires with the correct shape after finalize
+- **`webcomponent-events.spec.ts`** — the `<pdf-form-builder>` and `<pdf-form-signer>` custom elements emit the right events
+
+For new features that touch the demo UI or the web component event contract, add or update a spec in `tests/e2e/`.
 
 ## Making Changes
 
-### Small Changes (Bug Fixes, Minor Features)
-
-1. Fork the repo and create a branch:
+1. Fork the repo and create a branch with a descriptive name:
    ```bash
    git checkout -b fix/signature-scaling
+   git checkout -b feat/date-field-validation
    ```
 
-2. Make changes with tests and documentation
+2. Make your changes. If you're adding something new, include tests.
 
-3. Run tests and linting:
+3. Before opening a PR, make sure everything passes:
    ```bash
    npm test
    npm run lint
-   npm run type-check
    ```
 
-4. Create a pull request with:
-   - Clear title: "Fix: signature scaling respects bounding box"
-   - Description of the problem and solution
-   - Link to any related issues
-   - Test coverage for the fix
+4. Open a pull request with a clear description of **what** changed and **why**. If it fixes a bug, explain how to reproduce it. If it's a new feature, show how it's used. Link any related issues.
 
-### Large Changes (API Changes, New Features)
-
-1. Open an issue first to discuss the change
-2. Get consensus from maintainers
-3. Create a detailed RFC if it affects public APIs
-4. Submit PR with:
-   - Tests for the new feature
-   - Documentation updates
-   - Migration guide (if breaking)
-   - Changelog entry
+For larger changes or anything that touches the public API, open an issue first to discuss the approach — it avoids wasted effort if the direction needs adjustment.
 
 ## Documentation
 
-### Update Docs for Any Public API Change
+The API reference under `packages/docs/api/` is auto-generated from TSDoc comments via `typedoc` — you don't need to write or edit those files by hand. The `docs:gen` script handles it.
 
-- Add JSDoc/TSDoc comments to new public functions/components
-- Update relevant markdown files in `packages/docs/docs/`
-- Include code examples
-- Add to migration guide if breaking
+What contributors should do:
 
-### Documenting Components
+- Add TSDoc comments to any new public functions, composables, or component props. This is what gets picked up by `typedoc`.
+- If your change affects how the library is used (new prop, changed behavior, new utility), update the relevant guide in `packages/docs/` — e.g. `usage/vue-usage.md`, `getting-started.md`, or the integrity docs.
+- For breaking changes, note what needs to migrate in the PR description. A migration guide can be added to the docs as part of the release.
 
-```typescript
-/**
- * FormBuilder component for designing PDF form templates
- *
- * @example
- * ```vue
- * <FormBuilder :pdf="pdfUrl" v-model="template" />
- * ```
- *
- * @props pdf - PDF source (URL, File, or ArrayBuffer)
- * @props modelValue - Template object (use v-model)
- * @props dateLocale - Locale for date formatting
- *
- * @emits update:modelValue - Emitted when template changes
- */
-export default defineComponent({
-  // ...
-})
-```
+## Releases
 
-## Release Process
-
-### Before Releasing
-
-1. Update version in `package.json` (SemVer)
-2. Update `CHANGELOG.md` with notable changes and breaking changes
-3. Run full test suite: `npm test`
-4. Run build: `npm run build`
-5. Test in demo: `npm run demo`
-
-### Breaking Changes
-
-Always include a migration guide:
-
-```markdown
-## Migration Guide: v2.0.0
-
-### Breaking: Template schema changed
-
-The `pages` field now requires explicit `width` and `height`:
-
-**Before**:
-```json
-{ "pages": [null, null] }
-```
-
-**After**:
-```json
-{ "pages": [{ "width": 612, "height": 792 }] }
-```
-```
-
-### Versioning
-
-Follow [Semantic Versioning](https://semver.org/):
-- **MAJOR**: Breaking changes (2.0.0)
-- **MINOR**: Features, backwards-compatible (1.1.0)
-- **PATCH**: Bugs, patches (1.0.1)
+Releases are handled by the maintainer and the release pipeline — contributors don't need to bump versions, update the changelog, or tag releases. Just make sure your PR is clearly described so changes are easy to categorize.
 
 ## Code Review
 
