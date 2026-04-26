@@ -9,12 +9,13 @@
     "preview": "npm --workspace=@sign-kit/core run build:types && vite preview"
   },
   "dependencies": {
+    "pdfjs-dist": "^2.16.105",
     "vue": "^3.2",
-    "vue-router": "^4.6.4",
-    "pdfjs-dist": "^2.16.105"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.4",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "wrangler": "^4.85.0"
   }
 }

@@ -29,12 +29,11 @@ jobs:
       - name: Build demo site
         run: npm run build:demo
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages        
         uses: cloudflare/wrangler-action@v3
         with:
           wranglerVersion: "4"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          secrets: |
-            CLOUDFLARE_API_TOKEN
-          command: pages deploy packages/demo/dist --project-name=signkit-demo --name=signkit-demo --branch=master
+          workingDirectory: packages/demo
+          command: pages deploy
