@@ -1,4 +1,4 @@
-# @your-scope/pdf-sign-kit (monorepo)
+# @signkit/core (monorepo)
 
 A client-first Vue 3 toolkit for PDF form building and client-side signing.
 

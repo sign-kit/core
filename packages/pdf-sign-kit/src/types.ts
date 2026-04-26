@@ -1,5 +1,5 @@
 /**
- * Template and Field Types for @your-scope/pdf-sign-kit
+ * Template and Field Types for @signkit/core
  *
  * Coordinates: x, y, width, height are normalized values in range 0..1 relative to page dimensions.
  * page: 0-based page index

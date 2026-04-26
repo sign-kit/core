@@ -1,6 +1,6 @@
-# Agents Guide for @your-scope/pdf-sign-kit
+# Agents Guide for @signkit/core
 
-This file documents guidance for coding agents and contributors working on the `@your-scope/pdf-sign-kit` repository. It captures project goals, constraints, preferred libraries, testing and release expectations, and rules for safe, maintainable changes.
+This file documents guidance for coding agents and contributors working on the `@signkit/core` repository. It captures project goals, constraints, preferred libraries, testing and release expectations, and rules for safe, maintainable changes.
 
 ## Project Overview
 
