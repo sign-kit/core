@@ -3,7 +3,9 @@ import vue from '@vitejs/plugin-vue';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [vue()],
+  // Compile SFC styles for custom-elements so component-scoped CSS is inlined
+  // into each shadow root at runtime.
+  plugins: [vue({ customElement: true })],
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/web-components/register.ts'),

@@ -318,6 +318,75 @@ If using Tailwind:
 4. **Use CSS variables** for consistency across components
 5. **Document your custom tokens** for your team
 
+## Web Components: Shadow DOM + Constructable Stylesheets
+
+`@sign-kit/core` web components now inject shared styles directly into each component's shadow root at runtime using **Constructable Stylesheets** (`adoptedStyleSheets`).
+
+This gives you:
+
+1. Isolated, component-local default styles
+2. A runtime theme layer you can override without rebuilding
+3. A way to sync your global `:root` token values into the web components
+
+### API
+
+Import from the web components entry:
+
+```ts
+import {
+  registerPdfSignKitElements,
+  setPdfSignKitTheme,
+  syncPdfSignKitThemeFromRoot,
+} from '@sign-kit/core/webcomponents'
+```
+
+### 1) Register Elements
+
+```ts
+registerPdfSignKitElements()
+```
+
+### 2) Override Theme Tokens at Runtime
+
+Pass either a token map or a CSS string.
+
+```ts
+setPdfSignKitTheme({
+  '--sk-color-action-primary': '#003366',
+  '--sk-color-action-primary-hover': '#004499',
+  '--sk-font-family-sans': 'Open Sans, sans-serif',
+})
+```
+
+```ts
+setPdfSignKitTheme(`
+  :host {
+    --sk-color-action-primary: #111827;
+    --sk-color-action-primary-hover: #1f2937;
+    --sk-radius-sm: 10px;
+  }
+`)
+```
+
+### 3) Sync App `:root` Tokens into Web Components
+
+If your app already defines theme variables on `:root`, mirror them into all mounted `<pdf-form-builder>` / `<pdf-form-signer>` instances:
+
+```css
+:root {
+  --sk-color-action-primary: #0f766e;
+  --sk-color-action-primary-hover: #115e59;
+  --sk-color-text-primary: #0b1324;
+}
+```
+
+```ts
+// Reads current :root values and applies them to web components runtime theme sheet.
+syncPdfSignKitThemeFromRoot()
+```
+
+If your app supports live theme switching, call `syncPdfSignKitThemeFromRoot()` after your theme changes.
+
 ## Common Issues
 
 ### Styles Not Applying
