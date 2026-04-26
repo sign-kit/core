@@ -45,7 +45,7 @@ Each field has:
 
 ## Workflow Example
 
-![](/public/workflow-example.png)
+![workflow-example](/workflow-example.png)
 
 ## Key Design Decisions
 
