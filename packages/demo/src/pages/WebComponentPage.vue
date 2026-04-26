@@ -54,12 +54,14 @@ onMounted(() => {
 
   if (builder) {
     builder.template = sampleTemplate;
-    builder.pdf = { type: 'url', value: pdfUrlValue };
+    // pass a plain URL string so the component can fetch and load it
+    builder.pdf = pdfUrlValue;
   }
 
   if (signer) {
     signer.template = sampleTemplate;
-    signer.pdf = { type: 'url', value: pdfUrlValue };
+    // Signer component expects `pdfSrc` prop name
+    signer.pdfSrc = pdfUrlValue;
     signer.addEventListener('finalized', (e: any) => {
       // CustomElements will put event payload on detail
       manifest.value = e?.detail?.manifest ?? e?.detail ?? e;
