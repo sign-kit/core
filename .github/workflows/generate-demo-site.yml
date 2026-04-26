@@ -3,6 +3,10 @@ name: Generate and Build Demo Site
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'packages/demo/**'
+      - '.github/workflows/generate-demo-site.yml'
+      - 'packages/pdf-sign-kit/**'
   pull_request:
     branches: [ master ]
 
