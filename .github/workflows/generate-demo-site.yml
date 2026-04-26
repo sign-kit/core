@@ -1,0 +1,40 @@
+name: Generate and Build Demo Site
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4        
+        with:          
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Build demo site
+        run: npm run build:demo
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          secrets: |
+            CLOUDFLARE_API_TOKEN
+          command: pages deploy packages/demo/dist --project-name=signkit-demo
+
