@@ -10,6 +10,9 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify('production'),
   },
   build: {
+    // Do not wipe dist/ before building — other build steps (build:lib,
+    // build:types, build:copy-styles) contribute to the same directory.
+    emptyOutDir: false,
     lib: {
       entry: path.resolve(__dirname, 'src/web-components/register.ts'),
       name: 'PdfSignKitWC',

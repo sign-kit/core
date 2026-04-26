@@ -8,6 +8,7 @@ import buttonStylesInline from '../styles/buttons.css?inline';
 import formStylesInline from '../styles/forms.css?inline';
 import panelStylesInline from '../styles/panels.css?inline';
 import overlayStylesInline from '../styles/overlays.css?inline';
+import formBuilderCssInline from '../components/FormBuilder/FormBuilder.css?inline';
 
 const WC_TAGS = ['pdf-form-builder', 'pdf-form-signer'] as const;
 
@@ -25,6 +26,7 @@ const sharedStylesCssText = [
   formStylesInline,
   panelStylesInline,
   overlayStylesInline,
+  formBuilderCssInline,
 ]
   .join('\n')
   .replace(/:root\b/g, ':host');

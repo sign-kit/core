@@ -19,10 +19,14 @@
     "test:e2e:headed": "npm --workspace=@sign-kit/core run build:wc && npx playwright test --headed",
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:skip-build": "npx playwright test",
+    "test:artifacts": "npx playwright test tests/e2e/artifact-smoke.spec.ts",
+    "validate:build": "node scripts/validate-build.mjs",
+    "validate:build:skip-build": "node scripts/validate-build.mjs --skip-build",
     "lint": "npm run lint --workspaces",
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@sign-kit/core": "^0.1.0",
     "pdfjs-dist": "^5.6.205",
     "puppeteer": "^24.42.0"
   },

@@ -254,4 +254,11 @@ function onDelete() {
 }
 </script>
 
-<style scoped src="./FormBuilder.css"></style>
+<style scoped>
+/*
+  Intentionally empty.
+  Shared builder styles are provided by FormBuilder.vue via an unscoped
+  `FormBuilder.css` import so sibling components (FieldPalette, PdfCanvas,
+  etc.) receive consistent layout and bank styling in library consumers.
+*/
+</style>

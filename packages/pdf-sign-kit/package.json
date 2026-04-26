@@ -31,13 +31,14 @@
   },
   "main": "dist/pdf-sign-kit.cjs.js",
   "module": "dist/pdf-sign-kit.es.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "style": "dist/styles/index.css",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/pdf-sign-kit.es.js",
       "require": "./dist/pdf-sign-kit.cjs.js"
     },
@@ -45,7 +46,7 @@
     "./styles.css": "./dist/styles/index.css"
   },
   "scripts": {
-    "build:types": "tsc -p tsconfig.json",
+    "build:types": "node -e \"try{require('fs').rmSync('tsconfig.tsbuildinfo')}catch(_){}\" && tsc -p tsconfig.json",
     "build:lib": "vite build --config vite.lib.config.ts",
     "build:wc": "vite build --config vite.wc.config.ts",
     "build:copy-styles": "node scripts/copy-styles.js",

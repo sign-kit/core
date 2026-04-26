@@ -6,6 +6,11 @@ packages/*/dist/
 .idea/
 .vscode/
 coverage/
-node_modules/
 docs/.vitepress/cache
 test-results/
+
+# Pre-publish validation artifacts
+tmp-pack/
+fixture/node_modules/
+fixture/package.json
+fixture/package-lock.json
