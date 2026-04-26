@@ -7,6 +7,9 @@ on:
       - 'packages/demo/**'
       - '.github/workflows/generate-demo-site.yml'
       - 'packages/pdf-sign-kit/**'
+      - '!packages/docs/package.lock.json'
+      - '!packages/docs/package.lock.json'
+
   pull_request:
     branches: [ master ]
 
