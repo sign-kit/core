@@ -89,6 +89,26 @@ const emit = defineEmits<{
 
 const mode = props.mode ?? 'standard';
 
+function buildFallbackTemplate(): Template {
+  return {
+    id: 'signer-template-pending',
+    version: '1.0.0',
+    pages: [],
+    fields: [],
+    createdAt: new Date().toISOString(),
+  } as Template;
+}
+
+function getSafeTemplate(input: Template | null | undefined): Template {
+  if (!input) return buildFallbackTemplate();
+  if (!Array.isArray((input as any).fields) || !Array.isArray((input as any).pages)) {
+    return buildFallbackTemplate();
+  }
+  return input;
+}
+
+const templateSafe = computed(() => getSafeTemplate((props as any).template));
+
 // load PDF via usePdfjs (accepts File/ArrayBuffer/string)
 const pdfSrcRef = ref(props.pdfSrc);
 const { pdfDoc, numPages, pageSizes, loading, renderPage } = usePdfjs(pdfSrcRef as any);
@@ -134,20 +154,29 @@ onMounted(() => {
   ensurePdfBytes();
 });
 
-let signerManager = useSignerManager(props.template, originalPdfBytes.value, props.signer ?? null);
+watch(
+  () => props.pdfSrc,
+  () => {
+    ensurePdfBytes();
+  },
+);
+
+let signerManager = useSignerManager(
+  templateSafe.value,
+  originalPdfBytes.value,
+  props.signer ?? null,
+);
 let values = signerManager.values as any;
 let errors = signerManager.errors as any;
 
-watch(originalPdfBytes, (b) => {
-  // re-create manager when pdf bytes become available
-  if (!b) return;
-  signerManager = useSignerManager(props.template, b, props.signer ?? null);
+watch([originalPdfBytes, templateSafe, () => props.signer], ([b, tmpl]) => {
+  signerManager = useSignerManager(tmpl, b ?? null, props.signer ?? null);
   values = signerManager.values as any;
   errors = signerManager.errors as any;
 });
 
 function fieldsOnPage(pageIndex: number) {
-  return props.template.fields.filter((f) => f.page === pageIndex);
+  return templateSafe.value.fields.filter((f) => f.page === pageIndex);
 }
 
 function fieldStyle(f: Field, pageIndex: number) {
@@ -241,7 +270,7 @@ async function handleFinalize() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${props.template.title || 'signed'}.pdf`;
+    a.download = `${(templateSafe.value as any).title || 'signed'}.pdf`;
     a.click();
     URL.revokeObjectURL(url);
   } catch (err: any) {
@@ -260,7 +289,7 @@ const integrity = ref<any>(null);
 async function computeIntegrity() {
   if (mode !== 'integrity') return;
   try {
-    const tmplCanonical = canonicalizeTemplate(props.template);
+    const tmplCanonical = canonicalizeTemplate(templateSafe.value);
     const templateHash = await computeSha256(new TextEncoder().encode(tmplCanonical).buffer);
     let pdfHash: string | undefined = undefined;
     if (originalPdfBytes.value) pdfHash = await computeSha256(originalPdfBytes.value);

@@ -134,6 +134,11 @@ watch(
     // update internal pdfSource used by usePdfjs so it reloads when parent changes
     if (!p) return;
     try {
+      const setPdfSource = (source: { type: string; value: string }) => {
+        ensurePdfRoot(template.value as any);
+        (template.value.pdf as any).source = source;
+      };
+
       if (typeof p === 'string') {
         // prefer loading the PDF into an ArrayBuffer to avoid worker/cors issues
         try {
@@ -141,15 +146,15 @@ watch(
           if (r.ok) {
             const buf = await r.arrayBuffer();
             pdfSource.value = buf as any;
-            (template.value.pdf as any).source = { type: 'url', value: p };
+            setPdfSource({ type: 'url', value: p });
           } else {
             pdfSource.value = p as any;
-            (template.value.pdf as any).source = { type: 'url', value: p };
+            setPdfSource({ type: 'url', value: p });
           }
         } catch (e) {
           // fallback to URL if fetch fails
           pdfSource.value = p as any;
-          (template.value.pdf as any).source = { type: 'url', value: p };
+          setPdfSource({ type: 'url', value: p });
         }
       } else if (p instanceof File) {
         try {
@@ -158,7 +163,7 @@ watch(
         } catch (e) {
           pdfSource.value = p as any;
         }
-        (template.value.pdf as any).source = { type: 'file-name', value: p.name || '' };
+        setPdfSource({ type: 'file-name', value: p.name || '' });
       } else {
         pdfSource.value = p as any;
       }

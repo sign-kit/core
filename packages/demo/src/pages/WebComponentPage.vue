@@ -40,6 +40,53 @@ const pdfUrl = inject('pdfUrl') as any;
 const pdfUrlValue = pdfUrl?.value ?? '/sample/sample.pdf';
 const manifest = ref<any | null>(null);
 
+// Keep signer defaults aligned with SignerPage.vue.
+const defaultSigner = { name: 'Demo User', email: 'demo@example.com' };
+const defaultMode: 'standard' = 'standard';
+const defaultExpectedHashes = {};
+const defaultEmbedPdfHash = false;
+const defaultTemplate = cloneTemplate(sampleTemplate);
+const liveTemplate = ref<any>(cloneTemplate(defaultTemplate));
+
+function isTemplateLike(value: any): boolean {
+  return !!value && Array.isArray(value.fields) && Array.isArray(value.pages);
+}
+
+function cloneTemplate(template: any) {
+  try {
+    return structuredClone(template);
+  } catch {
+    return JSON.parse(JSON.stringify(template));
+  }
+}
+
+function getBuilderTemplateSnapshot(builder: any) {
+  const candidates = [
+    builder?.modelValue,
+    builder?.template,
+    builder?.value,
+    builder?.__vueParentComponent?.props?.modelValue,
+  ];
+  for (const candidate of candidates) {
+    if (isTemplateLike(candidate)) return cloneTemplate(candidate);
+  }
+  return cloneTemplate(defaultTemplate);
+}
+
+function upsertFieldInTemplate(nextTemplate: any, field: any) {
+  if (!field || !field.id) return nextTemplate;
+  const fields = Array.isArray(nextTemplate.fields) ? [...nextTemplate.fields] : [];
+  const index = fields.findIndex((f: any) => f.id === field.id);
+  if (index >= 0) fields[index] = { ...fields[index], ...field };
+  else fields.push(field);
+  return { ...nextTemplate, fields };
+}
+
+function removeFieldInTemplate(nextTemplate: any, fieldId: string) {
+  const fields = Array.isArray(nextTemplate.fields) ? nextTemplate.fields : [];
+  return { ...nextTemplate, fields: fields.filter((f: any) => f.id !== fieldId) };
+}
+
 function ensureWcBundleLoaded(): Promise<void> {
   return new Promise((resolve, reject) => {
     const existing = document.querySelector(
@@ -75,16 +122,71 @@ onMounted(() => {
       const builder = document.getElementById('wc-builder') as any;
       const signer = document.getElementById('wc-signer') as any;
 
+      const pushTemplateToSigner = () => {
+        if (!signer) return;
+        signer.template = cloneTemplate(liveTemplate.value);
+      };
+
+      const syncFromBuilderSnapshot = () => {
+        liveTemplate.value = getBuilderTemplateSnapshot(builder);
+        pushTemplateToSigner();
+      };
+
       if (builder) {
-        builder.template = sampleTemplate;
+        const initialTemplate = cloneTemplate(defaultTemplate);
+        liveTemplate.value = cloneTemplate(initialTemplate);
+        // defineModel in FormBuilder maps to modelValue in CE runtime.
+        builder.modelValue = initialTemplate;
+        // keep legacy assignment for compatibility with prior integrations.
+        builder.template = initialTemplate;
         // pass a plain URL string so the component can fetch and load it
         builder.pdf = pdfUrlValue;
       }
 
       if (signer) {
-        signer.template = sampleTemplate;
+        pushTemplateToSigner();
         // Signer component expects `pdfSrc` prop name
         signer.pdfSrc = pdfUrlValue;
+        signer.signer = { ...defaultSigner };
+        signer.mode = defaultMode;
+        signer.expectedHashes = { ...defaultExpectedHashes };
+        signer.embedPdfHash = defaultEmbedPdfHash;
+
+        if (builder) {
+          // Full template replacement when model updates are available.
+          builder.addEventListener('update:modelValue', (e: any) => {
+            const next = e?.detail?.[0] ?? e?.detail?.value ?? e?.detail;
+            if (isTemplateLike(next)) {
+              liveTemplate.value = cloneTemplate(next);
+              pushTemplateToSigner();
+              return;
+            }
+            syncFromBuilderSnapshot();
+          });
+
+          // Incremental updates from builder field events.
+          builder.addEventListener('field-added', (e: any) => {
+            const field = e?.detail?.field ?? e?.detail;
+            liveTemplate.value = upsertFieldInTemplate(cloneTemplate(liveTemplate.value), field);
+            pushTemplateToSigner();
+          });
+
+          builder.addEventListener('field-updated', (e: any) => {
+            const field = e?.detail?.field ?? e?.detail;
+            liveTemplate.value = upsertFieldInTemplate(cloneTemplate(liveTemplate.value), field);
+            pushTemplateToSigner();
+          });
+
+          builder.addEventListener('field-removed', (e: any) => {
+            const id = e?.detail?.id ?? e?.detail;
+            if (!id) return;
+            liveTemplate.value = removeFieldInTemplate(cloneTemplate(liveTemplate.value), id);
+            pushTemplateToSigner();
+          });
+
+          syncFromBuilderSnapshot();
+        }
+
         signer.addEventListener('finalized', (e: any) => {
           // CustomElements will put event payload on detail
           manifest.value = e?.detail?.manifest ?? e?.detail ?? e;
