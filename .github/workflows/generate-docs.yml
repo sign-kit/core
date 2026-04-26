@@ -2,10 +2,9 @@ name: Generate and Build Docs
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
-
+    branches: [ master ]
 
 permissions:
   contents: read
