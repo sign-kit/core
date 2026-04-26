@@ -9,6 +9,7 @@
         <router-link to="/builder">Builder</router-link>
         <router-link to="/signer">Signer</router-link>
         <router-link to="/integrity">Integrity</router-link>
+        <router-link to="/webcomponent">Web Components</router-link>
       </nav>
     </header>
 

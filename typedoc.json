@@ -1,11 +1,15 @@
 {
-  "entryPoints": ["packages/pdf-sign-kit/src/index.ts"],
-  "out": "packages/docs/api",
-  "plugin": ["typedoc-plugin-markdown"],
-  "excludePrivate": true,
-  "excludeProtected": true,
-  "readme": "none",
-  "entryDocument": "schema.md",
-  "name": "@sign-kit/core Types",
-  "hideGenerator": true
+    "entryPoints": [
+        "packages/pdf-sign-kit/src/index.ts"
+    ],
+    "out": "packages/docs/api",
+    "plugin": [
+        "typedoc-plugin-markdown"
+    ],
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "readme": "none",
+    "entryDocument": "schema.md",
+    "name": "@sign-kit/core Types",
+    "hideGenerator": true
 }
