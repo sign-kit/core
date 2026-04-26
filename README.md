@@ -128,6 +128,14 @@ See [`packages/docs/contributing.md`](packages/docs/contributing.md) for the ful
 
 In short: fork, branch, make your change with tests, run `npm test && npm run lint`, open a detailed PR.
 
+In search of the following:
+- [ ] Styling improvements
+- [ ] Ports for 
+  - [x] Vue 
+  - [ ] React
+  - [ ] Angular
+  - [ ] Svelte
+
 ---
 
 ## License

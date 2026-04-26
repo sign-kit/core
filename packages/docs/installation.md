@@ -63,6 +63,50 @@ import '@sign-kit/core/dist/style.css'
 </html>
 ```
 
+### Web Components (React)
+
+After installing `@sign-kit/core`, register the custom elements once and render them like normal JSX tags.
+
+```tsx
+import { useEffect, useRef } from 'react'
+import '@sign-kit/core/webcomponents'
+import '@sign-kit/core/styles.css'
+
+export default function SignKitReactExample() {
+  const builderRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const builderEl = builderRef.current
+    if (!builderEl) return
+
+    const onTemplateExported = (event: Event) => {
+      const customEvent = event as CustomEvent
+      console.log('Template:', customEvent.detail)
+    }
+
+    builderEl.addEventListener('template-exported', onTemplateExported)
+    return () => builderEl.removeEventListener('template-exported', onTemplateExported)
+  }, [])
+
+  return <pdf-form-builder ref={builderRef} pdf="/sample.pdf" />
+}
+```
+
+If TypeScript reports unknown JSX tags, add this once in your React app (for example in `src/custom-elements.d.ts`):
+
+```ts
+import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+
+declare module 'react/jsx-runtime' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'pdf-form-builder': DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>
+      'pdf-form-signer': DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>
+    }
+  }
+}
+```
+
 ### TypeScript Types
 
 All components and utilities are fully typed. Types are auto-included:
