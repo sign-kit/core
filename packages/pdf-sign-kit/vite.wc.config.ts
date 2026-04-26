@@ -6,6 +6,9 @@ export default defineConfig({
   // Compile SFC styles for custom-elements so component-scoped CSS is inlined
   // into each shadow root at runtime.
   plugins: [vue({ customElement: true })],
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production'),
+  },
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/web-components/register.ts'),

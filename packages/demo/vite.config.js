@@ -4,7 +4,11 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   plugins: [
     vue({
-      customElement: /pdf-sign-kit[\\/]src[\\/]components[\\/].*\.vue$/,
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag === 'pdf-form-builder' || tag === 'pdf-form-signer',
+        },
+      },
     }),
   ],
   resolve: {
