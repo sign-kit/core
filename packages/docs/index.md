@@ -58,8 +58,11 @@ function onSigned(payload) {
 - [Installation](/installation) - Setup instructions
 - [Vue Components](/usage/vue-usage) - Build with Vue 3
 - [Web Components](/usage/web-components) - Use as custom elements
-- [API Reference](/api/form-builder) - Detailed component APIs
+- [API Reference](/api/README) - Generated API docs (props, types, utilities)
+- [FormBuilder Props](/api/interfaces/FormBuilderProps) - Builder component props
+- [Signer Props](/api/interfaces/SignerProps) - Signer component props
 - [Integrity & Security](/integrity/overview) - Hash verification and server integration
+- [Styling Guide](/styling) - CSS tokens and customization
 - [Demo](/demo-walkthrough) - Interactive walkthrough
 - [FAQ](/faq) - Common questions
 - [Contributing](/contributing) - Contribute to the project

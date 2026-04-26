@@ -2,6 +2,7 @@
     "entryPoints": [
         "packages/pdf-sign-kit/src/index.ts"
     ],
+    "tsconfig": "packages/pdf-sign-kit/tsconfig.json",
     "out": "packages/docs/api",
     "plugin": [
         "typedoc-plugin-markdown"
@@ -9,7 +10,6 @@
     "excludePrivate": true,
     "excludeProtected": true,
     "readme": "none",
-    "entryDocument": "schema.md",
     "name": "@sign-kit/core Types",
     "hideGenerator": true
 }

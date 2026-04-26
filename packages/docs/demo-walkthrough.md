@@ -16,7 +16,7 @@ The easiest way to experience `@sign-kit/core` is through our interactive demo:
 npm run dev:demo
 ```
 
-Then open your browser to **http://localhost:5173** and explore:
+Then open your browser to `http://localhost:5173` and explore:
 
 - **Form Builder** - Design PDF form templates with drag-and-drop fields
 - **PDF Signer** - Sign documents and export signed PDFs with manifests  
@@ -49,11 +49,11 @@ Then open your browser to **http://localhost:5173** and explore:
 For detailed walkthroughs of each feature, see:
 - [Vue Components Usage](/usage/vue-usage)
 - [Web Components Usage](/usage/web-components)
-- [FormBuilder API](/api/form-builder)
-- [Signer API](/api/signer)
+- [FormBuilder Props](/api/interfaces/FormBuilderProps)
+- [Signer Props](/api/interfaces/SignerProps)
 
 ## Next Steps
 
 - [Installation Guide](/installation) - Install in your own project
 - [Getting Started](/getting-started) - Core concepts and workflow
-- [API Reference](/api/form-builder) - Component props and events
+- [API Reference](/api/README) - Component props, types, and events

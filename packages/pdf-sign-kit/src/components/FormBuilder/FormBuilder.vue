@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import { ref, watch, nextTick, computed } from 'vue';
-import type { Template, Field, PageSize } from '../../types';
+import type { Template, Field, PageSize, FormBuilderProps } from '../../types';
 import PdfCanvas from './PdfCanvas.vue';
 import FieldPalette from './FieldPalette.vue';
 import BuilderToolbar from './BuilderToolbar.vue';
@@ -53,12 +53,7 @@ import { ensurePdfRoot } from '../../utils/template';
 // v-model: template (use defineModel for two-way binding)
 const model = defineModel<Template | null>();
 
-const props = defineProps<{
-  pdf?: File | ArrayBuffer | string | null;
-  initialZoom?: number;
-  // optional override for date locale used by template (e.g. 'en-US')
-  dateLocale?: string | null;
-}>();
+const props = defineProps<FormBuilderProps>();
 const emit = defineEmits<{
   (e: 'field-added', field: Field): void;
   (e: 'field-updated', field: Field): void;

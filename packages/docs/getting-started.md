@@ -69,4 +69,4 @@ Local SHA-256 hashing lets you detect tampering. This is **not** cryptographic p
 - [Install the package](/installation)
 - [Use Vue components](/usage/vue-usage)
 - [Use as Web Components](/usage/web-components)
-- [Check the API reference](/api/form-builder)
+- [Check the API reference](/api/README)

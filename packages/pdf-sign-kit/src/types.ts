@@ -162,3 +162,67 @@ export interface Manifest {
 
 // NOTE: 'current_date' field type must be created in the template but its value is resolved
 // by the Signer at signing time (it does not require user entry).
+
+// ---------------------------------------------------------------------------
+// Component prop interfaces — exported for host-app type safety and TypeDoc
+// ---------------------------------------------------------------------------
+
+/** Props accepted by the `<FormBuilder>` component. */
+export interface FormBuilderProps {
+  /** PDF source to render. Accepts a URL string, `File`, or `ArrayBuffer`. */
+  pdf?: File | ArrayBuffer | string | null;
+  /** Initial zoom scale (default `1`). */
+  initialZoom?: number;
+  /** BCP-47 locale used when formatting date fields (e.g. `'en-US'`). */
+  dateLocale?: string | null;
+}
+
+/** Signer identity passed to the `<Signer>` component. */
+export interface SignerInfo {
+  id?: string;
+  name?: string;
+  email?: string;
+  /** Role key used to restrict which fields this signer may fill. */
+  role?: string;
+}
+
+/** Pre-computed hashes supplied to the `<Signer>` for integrity verification. */
+export interface ExpectedHashes {
+  /** SHA-256 base64url hash of the canonicalized template JSON. */
+  templateHash?: string;
+  /** SHA-256 base64url hash of the original PDF bytes. */
+  pdfHash?: string;
+  /** SHA-256 base64url hash of the canonicalized field values. */
+  valuesHash?: string;
+}
+
+/** Props accepted by the `<Signer>` component. */
+export interface SignerProps {
+  /** PDF source to render and sign. Accepts a URL string, `File`, or `ArrayBuffer`. */
+  pdfSrc: string | ArrayBuffer | File | null;
+  /** Template describing the fields to present for signing. */
+  template: Template;
+  /** Identity of the current signer. Controls role-based field access. */
+  signer?: SignerInfo | null;
+  /**
+   * Display mode.
+   * - `'standard'` — basic signing UI.
+   * - `'integrity'` — shows the integrity banner with hash verification results.
+   */
+  mode?: 'standard' | 'integrity';
+  /** Expected hashes for integrity verification. Only used when `mode` is `'integrity'`. */
+  expectedHashes?: ExpectedHashes | null;
+  /**
+   * How to respond when integrity verification fails.
+   * - `'disabled'` — no checks performed.
+   * - `'warn'` — show a warning but allow signing.
+   * - `'strict'` — block signing if verification fails.
+   */
+  verificationMode?: 'disabled' | 'warn' | 'strict';
+  /** When `true`, signers may override a failed integrity check to proceed anyway. */
+  allowOverride?: boolean;
+  /** When `true`, all fields are rendered as read-only. */
+  readonly?: boolean;
+  /** When `true`, embeds the PDF hash into the manifest at finalize time. */
+  embedPdfHash?: boolean;
+}

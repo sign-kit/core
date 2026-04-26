@@ -32,11 +32,14 @@ export default defineConfig({
       {
         text: 'API Reference',
         items: [
-          { text: 'Form Builder', link: '/api/form-builder' },
-          { text: 'Signer', link: '/api/signer' },
-          { text: 'Schema & Types', link: '/api/schema' },
+          { text: 'API Overview', link: '/api/README' },
+          { text: 'FormBuilder Props', link: '/api/interfaces/FormBuilderProps' },
+          { text: 'Signer Props', link: '/api/interfaces/SignerProps' },
+          { text: 'Template Type', link: '/api/interfaces/Template' },
+          { text: 'Manifest Type', link: '/api/interfaces/Manifest' },
+          { text: 'PdfSource Type', link: '/api/interfaces/PdfSource' },
           {
-            text: 'Styling',
+            text: 'Styling Guide',
             link: '/styling',
           },
         ],
@@ -76,9 +79,37 @@ export default defineConfig({
         {
           text: 'API Reference',
           items: [
-            { text: 'Form Builder', link: '/api/form-builder' },
-            { text: 'Signer', link: '/api/signer' },
-            { text: 'Schema & Types', link: '/api/schema' },
+            { text: 'API Overview', link: '/api/README' },
+            { text: 'Styling Guide', link: '/styling' },
+          ],
+        },
+        {
+          text: 'Component Props',
+          items: [
+            { text: 'FormBuilder Props', link: '/api/interfaces/FormBuilderProps' },
+            { text: 'Signer Props', link: '/api/interfaces/SignerProps' },
+            { text: 'Signer Identity', link: '/api/interfaces/SignerInfo' },
+            { text: 'Expected Hashes', link: '/api/interfaces/ExpectedHashes' },
+          ],
+        },
+        {
+          text: 'Core Types',
+          items: [
+            { text: 'Template', link: '/api/interfaces/Template' },
+            { text: 'Manifest', link: '/api/interfaces/Manifest' },
+            { text: 'PdfSource', link: '/api/interfaces/PdfSource' },
+            { text: 'PdfInfo', link: '/api/interfaces/PdfInfo' },
+            { text: 'Field', link: '/api/type-aliases/Field' },
+            { text: 'FieldType', link: '/api/type-aliases/FieldType' },
+          ],
+        },
+        {
+          text: 'Utilities',
+          items: [
+            { text: 'canonicalizeTemplate', link: '/api/functions/canonicalizeTemplate' },
+            { text: 'computeSha256', link: '/api/functions/computeSha256' },
+            { text: 'computeValuesHash', link: '/api/functions/computeValuesHash' },
+            { text: 'computePdfHash', link: '/api/variables/computePdfHash' },
           ],
         },
       ],

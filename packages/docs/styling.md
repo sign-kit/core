@@ -430,4 +430,4 @@ Use your browser's DevTools to inspect and test styles:
 
 ---
 
-For detailed component structure and more styles, check [FormBuilder](/api/form-builder) and [Signer](/api/signer) API docs.
+For detailed component structure and more styles, check [FormBuilder Props](/api/interfaces/FormBuilderProps) and [Signer Props](/api/interfaces/SignerProps) in the API docs.

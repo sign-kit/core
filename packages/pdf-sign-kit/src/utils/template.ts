@@ -22,8 +22,9 @@ export function migratePdfSourceFromLegacy(t: Template): Template {
   try {
     const meta = t.meta as any;
     if (meta && meta.pdfUrl && (!t.pdf || !t.pdf.source || !t.pdf.source.value)) {
-      t.pdf = t.pdf || ({} as any);
-      t.pdf.source = { type: 'url', value: meta.pdfUrl, label: 'migrated' };
+      const pdf = t.pdf || ({} as any);
+      t.pdf = pdf;
+      pdf.source = { type: 'url', value: meta.pdfUrl, label: 'migrated' };
     }
   } catch (e) {}
   return t;

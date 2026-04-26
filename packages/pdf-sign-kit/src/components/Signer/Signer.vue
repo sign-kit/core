@@ -61,7 +61,7 @@
 
 <script lang="ts" setup>
 import { ref, watch, computed, onMounted, reactive, nextTick } from 'vue';
-import type { Template, Field } from '../../types';
+import type { Template, Field, SignerProps } from '../../types';
 import FieldInput from './FieldInput.vue';
 import SignatureChoiceModal from './SignatureChoiceModal.vue';
 import IntegrityBanner from './IntegrityBanner.vue';
@@ -69,17 +69,7 @@ import { usePdfjs } from '../../composables/usePdfjs';
 import { useSignerManager } from '../../composables/useSigner';
 import { canonicalizeTemplate, computeSha256, computeValuesHash } from '../../utils/signer';
 
-const props = defineProps<{
-  pdfSrc: string | ArrayBuffer | File | null;
-  template: Template;
-  signer?: { id?: string; name?: string; email?: string; role?: string } | null;
-  mode?: 'standard' | 'integrity';
-  expectedHashes?: { templateHash?: string; pdfHash?: string; valuesHash?: string } | null;
-  verificationMode?: 'disabled' | 'warn' | 'strict';
-  allowOverride?: boolean;
-  readonly?: boolean;
-  embedPdfHash?: boolean;
-}>();
+const props = defineProps<SignerProps>();
 
 const emit = defineEmits<{
   (e: 'finalized', payload: { values: any[]; signedPdf: Blob; manifest: any }): void;
