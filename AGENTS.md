@@ -1,6 +1,6 @@
-# Agents Guide for @signkit/core
+# Agents Guide for @sign-kit/core
 
-This file documents guidance for coding agents and contributors working on the `@signkit/core` repository. It captures project goals, constraints, preferred libraries, testing and release expectations, and rules for safe, maintainable changes.
+This file documents guidance for coding agents and contributors working on the `@sign-kit/core` repository. It captures project goals, constraints, preferred libraries, testing and release expectations, and rules for safe, maintainable changes.
 
 ## Project Overview
 
@@ -36,19 +36,22 @@ This file documents guidance for coding agents and contributors working on the `
 
 - Framework: Vue 3 (Composition API) with TypeScript
 - Build: Vite for library + demo site
-- Rendering: `pdfjs-dist` for PDF page rendering
+- Rendering: `pdfjs-dist` for PDF page rendering — declared as a root-level workspace dependency and externalized from the library bundle; host apps must provide it
 - PDF manipulation: `pdf-lib` to compose and flatten signed PDFs
-- Web Components: `@vue/web-component-wrapper` or `vite-plugin-web-components` (evaluate options)
-- Docs: VitePress for documentation site
-- Testing: Vitest + @testing-library/vue for unit/component tests
+- Web Components: Vue's built-in `defineCustomElement` — no third-party WC plugin required. Registered tags: `<pdf-form-builder>` and `<pdf-form-signer>`.
+- Docs: VitePress for documentation site; API reference generated with `typedoc` + `typedoc-plugin-markdown`
+- Testing: Vitest for unit and composable tests; Puppeteer for browser smoke tests
 - Linting/Formatting: ESLint + Prettier + TypeScript compiler checks
 
 ## Repository Expectations
 
-- Exports: Clean, explicit exports in `package.json` with TypeScript typings (`types`/`exports`).
-- Mono-package: Keep a single package layout unless the project grows; prefer internal directories (e.g., `src/components`, `src/composables`, `src/utils`).
-- Demo: Include a `demo/` or `examples/` folder with a minimal Vite app showcasing form-builder and signer.
-- Docs: `docs/` powered by VitePress with guides, API reference, and a security/integrity explainer.
+- Exports: Clean, explicit exports in `package.json` with TypeScript typings (`types`/`exports`). The library exports a compiled CSS file at `./styles.css`.
+- Monorepo layout: Three packages under `packages/`:
+  - `packages/pdf-sign-kit` — the publishable library (`@sign-kit/core`), with `src/components`, `src/composables`, `src/utils`, `src/styles`, and `src/web-components`.
+  - `packages/demo` — minimal Vite + Vue app showcasing form-builder and signer.
+  - `packages/docs` — VitePress documentation site.
+- Styleguide: CSS design tokens live in `packages/pdf-sign-kit/src/styles/tokens.css` under the `--sk-` prefix. UI primitives use the `sk-` class prefix. Consumers override tokens on `:root` or a container; Shadow DOM elements inherit host-document CSS variables. See `STYLEGUIDE.MD` (root) and `packages/pdf-sign-kit/STYLEGUIDE.md` for full details.
+- Docs: `packages/docs/` powered by VitePress; API reference auto-generated via `typedoc` (`docs:gen` script at the root).
 - CI: Run lint, type-checking, and tests on PRs. Build artifacts only on release workflows.
 
 ## Coding Standards
@@ -62,8 +65,10 @@ This file documents guidance for coding agents and contributors working on the `
 
 ## Testing Expectations
 
-- Unit tests: Use Vitest and @testing-library/vue for UI behavior and composable logic.
-- Integration tests: Critical flows (loading template, placing fields, saving JSON, signing, generating PDF + manifest) should have integration tests that validate expected JSON and PDF bytes where possible.
+- Unit tests: Use Vitest for composable logic, utility functions, and schema validation.
+- Integration tests: Critical flows (loading template, placing fields, saving JSON, signing, generating PDF + manifest) should have integration tests that validate expected JSON and PDF bytes where possible. See `packages/pdf-sign-kit/test/`.
+- Smoke tests: Puppeteer smoke tests in `scripts/` verify that the demo app renders pages and the browser console is error-free. Run via `scripts/demo-smoke.js` against a locally served demo.
+- Headless scripts: `scripts/headless-finalize.js` exercises the finalize flow without a browser UI.
 - CI enforcement: Tests must run on pull requests; new features must include tests for expected behavior and edge cases.
 
 ## Documentation Expectations
@@ -77,7 +82,7 @@ This file documents guidance for coding agents and contributors working on the `
 
 - Versioning: Follow SemVer. Breaking changes require a major version bump and a migration guide.
 - Changelog: Keep a human-readable changelog (e.g., `CHANGELOG.md`) with notable changes and migration notes.
-- Build artifacts: Produce ESM + UMD (optional) bundles and ensure type declarations accompany published packages.
+- Build artifacts: Always produce ESM (`pdf-sign-kit.es.js`) and CJS (`pdf-sign-kit.cjs.js`) bundles for the library, plus an IIFE bundle (`pdf-sign-kit.wc.iife.js`) for the standalone web-component build. Ensure TypeScript declarations accompany published packages. UMD is not produced.
 
 ## Anti-Patterns to Avoid
 
