@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [
@@ -13,7 +14,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@sign-kit/styles': 'C:/oss-pdf-signer/packages/pdf-sign-kit/src/styles',
+      '@sign-kit/styles': fileURLToPath(new URL('../pdf-sign-kit/src/styles', import.meta.url)),
     },
   },
 });

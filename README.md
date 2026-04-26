@@ -1,5 +1,7 @@
 # @signkit/core (monorepo)
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P22RTZ6)
+
 A client-first Vue 3 toolkit for PDF form building and client-side signing.
 
 Quick start

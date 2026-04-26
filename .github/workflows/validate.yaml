@@ -1,0 +1,13 @@
+name: Validate - Run tests and checks on PRs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    uses: ./.github/workflows/reusable-tests.yml
+    with:      
+      run-e2e: true

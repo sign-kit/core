@@ -2,6 +2,9 @@
   "name": "@sign-kit/core",
   "version": "0.1.0",
   "license": "Apache-2.0",
+  "sponsor": {
+    "url": "https://ko-fi.com/P5P22RTZ6"
+  },
   "author": {
     "name": "Marcello Bachechi",
     "url": "https://github.com/pilotkid"
