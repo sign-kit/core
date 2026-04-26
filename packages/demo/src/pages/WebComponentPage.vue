@@ -34,7 +34,7 @@
 <script lang="ts" setup>
 import { inject, ref, onMounted } from 'vue';
 import sampleTemplate from '../data/sample-template.json';
-import wcBundleSource from '../../../pdf-sign-kit/dist/pdf-sign-kit.wc.iife.js?raw';
+import { registerPdfSignKitElements } from '../../../pdf-sign-kit/src/web-components/register';
 
 const pdfUrl = inject('pdfUrl') as any;
 const pdfUrlValue = pdfUrl?.value ?? '/sample/sample.pdf';
@@ -87,118 +87,89 @@ function removeFieldInTemplate(nextTemplate: any, fieldId: string) {
   return { ...nextTemplate, fields: fields.filter((f: any) => f.id !== fieldId) };
 }
 
-function ensureWcBundleLoaded(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector(
-      'script[data-signkit-wc="1"]',
-    ) as HTMLScriptElement | null;
-    if (existing) {
-      if ((window as any).PdfSignKitWC) resolve();
-      else reject(new Error('Webcomponents script tag exists but PdfSignKitWC global is missing'));
-      return;
+onMounted(() => {
+  try {
+    registerPdfSignKitElements();
+  } catch (e) {
+    console.warn('registerPdfSignKitElements failed or already registered', e);
+  }
+
+  const builder = document.getElementById('wc-builder') as any;
+  const signer = document.getElementById('wc-signer') as any;
+
+  const pushTemplateToSigner = () => {
+    if (!signer) return;
+    signer.template = cloneTemplate(liveTemplate.value);
+  };
+
+  const syncFromBuilderSnapshot = () => {
+    liveTemplate.value = getBuilderTemplateSnapshot(builder);
+    pushTemplateToSigner();
+  };
+
+  if (builder) {
+    const initialTemplate = cloneTemplate(defaultTemplate);
+    liveTemplate.value = cloneTemplate(initialTemplate);
+    // defineModel in FormBuilder maps to modelValue in CE runtime.
+    builder.modelValue = initialTemplate;
+    // keep legacy assignment for compatibility with prior integrations.
+    builder.template = initialTemplate;
+    // pass a plain URL string so the component can fetch and load it
+    builder.pdf = pdfUrlValue;
+  }
+
+  if (signer) {
+    pushTemplateToSigner();
+    // Signer component expects `pdfSrc` prop name
+    signer.pdfSrc = pdfUrlValue;
+    signer.signer = { ...defaultSigner };
+    signer.mode = defaultMode;
+    signer.expectedHashes = { ...defaultExpectedHashes };
+    signer.embedPdfHash = defaultEmbedPdfHash;
+
+    if (builder) {
+      // Full template replacement when model updates are available.
+      builder.addEventListener('update:modelValue', (e: any) => {
+        const next = e?.detail?.[0] ?? e?.detail?.value ?? e?.detail;
+        if (isTemplateLike(next)) {
+          liveTemplate.value = cloneTemplate(next);
+          pushTemplateToSigner();
+          return;
+        }
+        syncFromBuilderSnapshot();
+      });
+
+      // Incremental updates from builder field events.
+      builder.addEventListener('field-added', (e: any) => {
+        const field = e?.detail?.field ?? e?.detail;
+        liveTemplate.value = upsertFieldInTemplate(cloneTemplate(liveTemplate.value), field);
+        pushTemplateToSigner();
+      });
+
+      builder.addEventListener('field-updated', (e: any) => {
+        const field = e?.detail?.field ?? e?.detail;
+        liveTemplate.value = upsertFieldInTemplate(cloneTemplate(liveTemplate.value), field);
+        pushTemplateToSigner();
+      });
+
+      builder.addEventListener('field-removed', (e: any) => {
+        const id = e?.detail?.id ?? e?.detail;
+        if (!id) return;
+        liveTemplate.value = removeFieldInTemplate(cloneTemplate(liveTemplate.value), id);
+        pushTemplateToSigner();
+      });
+
+      syncFromBuilderSnapshot();
     }
 
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.setAttribute('data-signkit-wc', '1');
-    script.textContent = wcBundleSource;
-    document.head.appendChild(script);
-
-    if ((window as any).PdfSignKitWC) resolve();
-    else reject(new Error('Webcomponents bundle loaded but PdfSignKitWC global was not found'));
-  });
-}
-
-onMounted(() => {
-  // load prebuilt WC bundle and register custom elements
-  ensureWcBundleLoaded()
-    .then(() => {
-      try {
-        (window as any).PdfSignKitWC?.registerPdfSignKitElements?.();
-      } catch (e) {
-        console.warn('registerPdfSignKitElements failed or already registered', e);
-      }
-
-      const builder = document.getElementById('wc-builder') as any;
-      const signer = document.getElementById('wc-signer') as any;
-
-      const pushTemplateToSigner = () => {
-        if (!signer) return;
-        signer.template = cloneTemplate(liveTemplate.value);
-      };
-
-      const syncFromBuilderSnapshot = () => {
-        liveTemplate.value = getBuilderTemplateSnapshot(builder);
-        pushTemplateToSigner();
-      };
-
-      if (builder) {
-        const initialTemplate = cloneTemplate(defaultTemplate);
-        liveTemplate.value = cloneTemplate(initialTemplate);
-        // defineModel in FormBuilder maps to modelValue in CE runtime.
-        builder.modelValue = initialTemplate;
-        // keep legacy assignment for compatibility with prior integrations.
-        builder.template = initialTemplate;
-        // pass a plain URL string so the component can fetch and load it
-        builder.pdf = pdfUrlValue;
-      }
-
-      if (signer) {
-        pushTemplateToSigner();
-        // Signer component expects `pdfSrc` prop name
-        signer.pdfSrc = pdfUrlValue;
-        signer.signer = { ...defaultSigner };
-        signer.mode = defaultMode;
-        signer.expectedHashes = { ...defaultExpectedHashes };
-        signer.embedPdfHash = defaultEmbedPdfHash;
-
-        if (builder) {
-          // Full template replacement when model updates are available.
-          builder.addEventListener('update:modelValue', (e: any) => {
-            const next = e?.detail?.[0] ?? e?.detail?.value ?? e?.detail;
-            if (isTemplateLike(next)) {
-              liveTemplate.value = cloneTemplate(next);
-              pushTemplateToSigner();
-              return;
-            }
-            syncFromBuilderSnapshot();
-          });
-
-          // Incremental updates from builder field events.
-          builder.addEventListener('field-added', (e: any) => {
-            const field = e?.detail?.field ?? e?.detail;
-            liveTemplate.value = upsertFieldInTemplate(cloneTemplate(liveTemplate.value), field);
-            pushTemplateToSigner();
-          });
-
-          builder.addEventListener('field-updated', (e: any) => {
-            const field = e?.detail?.field ?? e?.detail;
-            liveTemplate.value = upsertFieldInTemplate(cloneTemplate(liveTemplate.value), field);
-            pushTemplateToSigner();
-          });
-
-          builder.addEventListener('field-removed', (e: any) => {
-            const id = e?.detail?.id ?? e?.detail;
-            if (!id) return;
-            liveTemplate.value = removeFieldInTemplate(cloneTemplate(liveTemplate.value), id);
-            pushTemplateToSigner();
-          });
-
-          syncFromBuilderSnapshot();
-        }
-
-        signer.addEventListener('finalized', (e: any) => {
-          // CustomElements will put event payload on detail
-          manifest.value = e?.detail?.manifest ?? e?.detail ?? e;
-        });
-        signer.addEventListener('integrity-verification', (e: any) => {
-          console.log('integrity-verification', e.detail ?? e);
-        });
-      }
-    })
-    .catch((err) => {
-      console.error(err);
+    signer.addEventListener('finalized', (e: any) => {
+      // CustomElements will put event payload on detail
+      manifest.value = e?.detail?.manifest ?? e?.detail ?? e;
     });
+    signer.addEventListener('integrity-verification', (e: any) => {
+      console.log('integrity-verification', e.detail ?? e);
+    });
+  }
 });
 </script>
 
