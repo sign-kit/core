@@ -1,40 +1,189 @@
-# @sign-kit/core - Styling & Theming
+# @sign-kit/core
 
-This package exposes CSS design tokens and shared styles so consumers can easily customize the look and feel.
+Client-first Vue 3 toolkit for building PDF form templates and collecting signatures — entirely in the browser, no backend required.
 
-Quick guide
+[![npm](https://img.shields.io/npm/v/@sign-kit/core)](https://www.npmjs.com/package/@sign-kit/core)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/sign-kit/core/blob/main/LICENSE)
 
-- Include styles (recommended):
+**[Live Demo](https://demo.signkit.dev/) · [Documentation](https://docs.signkit.dev/) · [GitHub](https://github.com/sign-kit/core)**
 
-  - After installing the package, import the compiled stylesheet from the package entry:
+---
 
-    import '@sign-kit/core/styles.css'
+> If this project saves you time, consider [buying me a coffee on Ko-fi](https://ko-fi.com/P5P22RTZ6). It helps keep the project maintained. ☕
 
-  - This imports `dist/styles/index.css` which bundles the token definitions and component styles.
+---
 
-- Override tokens to customize theme:
+## What it does
 
-  - Tokens are CSS custom properties defined on `:root` in `--sk-` namespace (see `--sk-color-*`, `--sk-radius-*`, `--sk-font-*`).
-  - Example: change the primary action color and signature font in your app's global CSS:
+`@sign-kit/core` gives you two components:
 
-    :root {
-      --sk-color-action-primary: #7b61ff;
-      --sk-color-on-action: #ffffff;
-      --sk-font-signature: 'Shadows Into Light', cursive;
-    }
+- **`<FormBuilder>`** — Load a PDF, drag and drop signature/text/date/checkbox fields onto pages, and export a reusable template JSON.
+- **`<Signer>`** — Load a PDF + template JSON, let users draw or type signatures and fill fields, then produce a signed PDF and a manifest JSON describing every field value and signing metadata.
 
-  - Load your overrides *after* the package CSS so they take precedence.
+Everything runs client-side via [pdf.js](https://mozilla.github.io/pdf.js/) for rendering and [pdf-lib](https://pdf-lib.js.org/) for PDF generation. No API keys, no servers.
 
-- Importing tokens only (advanced):
+---
 
-  - If you want to control the entire styling surface, import tokens and then your own component CSS:
+## Installation
 
-    import '@sign-kit/core/dist/styles/tokens.css'
-    import './my-signkit-overrides.css'
+```bash
+npm install @sign-kit/core
+```
 
-- Notes:
+`pdfjs-dist` is a peer dependency. If you don't already have it:
 
-  - The package uses CSS tokens for colors, spacing, radii and fonts. Where a component renders onto a canvas (typed signature preview, signature pad), the canvas drawing reads tokens at runtime so your overrides affect drawn output as well.
-  - If your build system strips CSS custom properties at runtime (rare), prefer importing a custom CSS file that overrides variables in `:root`.
+```bash
+npm install pdfjs-dist
+```
 
-If you'd like, I can also add an example theme file under `packages/pdf-sign-kit/demo/themes/` and wire it into the demo app.
+---
+
+## Vue component usage
+
+### 1. Import styles
+
+Add this once in your app entry (e.g. `main.ts`):
+
+```ts
+import '@sign-kit/core/styles.css'
+```
+
+### 2. Form Builder
+
+Let users design a signing template by placing fields on a PDF:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { FormBuilder } from '@sign-kit/core'
+import type { Template } from '@sign-kit/core'
+
+const template = ref<Template | null>(null)
+</script>
+
+<template>
+  <FormBuilder
+    pdf="/your-document.pdf"
+    v-model="template"
+    @update:modelValue="(t) => console.log('template updated', t)"
+  />
+</template>
+```
+
+When the user clicks **Export**, the component emits the updated `Template` object via `v-model`. Save this JSON however your app needs — it's the input to the Signer.
+
+### 3. Signer
+
+Present the saved template to a signer and collect their signature:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Signer } from '@sign-kit/core'
+import type { Template, Manifest } from '@sign-kit/core'
+
+const props = defineProps<{
+  template: Template
+}>()
+
+const manifest = ref<Manifest | null>(null)
+
+function onFinalize(result: { signedPdfBytes: Uint8Array; manifest: Manifest }) {
+  manifest.value = result.manifest
+  // result.signedPdfBytes is the signed PDF — download or send it somewhere
+}
+</script>
+
+<template>
+  <Signer
+    pdf-src="/your-document.pdf"
+    :template="props.template"
+    :signer="{ name: 'Jane Smith', email: 'jane@example.com' }"
+    @finalize="onFinalize"
+  />
+</template>
+```
+
+`@finalize` receives `{ signedPdfBytes: Uint8Array, manifest: Manifest }`. The `manifest` is a plain JSON object — store it alongside the signed PDF for your records.
+
+---
+
+## Web Component usage
+
+If you're not using Vue, the components are also available as standard custom elements.
+
+### Script tag (CDN / vanilla HTML)
+
+```html
+<script src="https://unpkg.com/@sign-kit/core/dist/pdf-sign-kit.wc.iife.js"></script>
+
+<!-- Form Builder -->
+<pdf-form-builder id="builder"></pdf-form-builder>
+
+<!-- Signer -->
+<pdf-form-signer id="signer"></pdf-form-signer>
+
+<script>
+  const builder = document.getElementById('builder')
+  builder.setAttribute('pdf', '/your-document.pdf')
+
+  builder.addEventListener('template-exported', (e) => {
+    const template = e.detail
+    console.log('template', template)
+
+    // Pass template to the signer as JSON
+    const signer = document.getElementById('signer')
+    signer.setAttribute('pdf-src', '/your-document.pdf')
+    signer.setAttribute('template', JSON.stringify(template))
+  })
+
+  document.getElementById('signer').addEventListener('finalize', (e) => {
+    const { manifest, signedPdfBytes } = e.detail
+    console.log('manifest', manifest)
+  })
+</script>
+```
+
+### npm bundler
+
+```ts
+import '@sign-kit/core/webcomponents'
+// then use <pdf-form-builder> and <pdf-form-signer> in your HTML/templates
+```
+
+---
+
+## Theming
+
+Styles are driven by CSS custom properties under the `--sk-` prefix. Override them on `:root` (or any container) after importing the stylesheet:
+
+```css
+:root {
+  --sk-color-action-primary: #7b61ff;
+  --sk-color-on-action: #ffffff;
+  --sk-font-signature: 'Shadows Into Light', cursive;
+  --sk-radius-md: 8px;
+}
+```
+
+See the [Styling Guide](https://docs.signkit.dev/styling) for the full token reference.
+
+---
+
+## Key types
+
+| Type | Description |
+|---|---|
+| `Template` | The form definition — fields, page sizes, metadata |
+| `Manifest` | The signing record — field values, hashes, signer info |
+| `Field` | Union of `SignatureField`, `TextField`, `DateField`, `CheckboxField` |
+| `FormBuilderProps` | Props accepted by `<FormBuilder>` |
+| `SignerProps` | Props accepted by `<Signer>` |
+
+Full API reference at [docs.signkit.dev/api](https://docs.signkit.dev/api/README).
+
+---
+
+## License
+
+Apache 2.0 — see [LICENSE](https://github.com/sign-kit/core/blob/main/LICENSE).

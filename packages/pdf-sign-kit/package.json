@@ -1,7 +1,27 @@
 {
   "name": "@sign-kit/core",
   "version": "0.1.0",
+  "description": "Client-first Vue 3 toolkit for building PDF form templates and collecting signatures in the browser — no backend required.",
   "license": "Apache-2.0",
+  "keywords": [
+    "pdf",
+    "signature",
+    "pdf-signing",
+    "form-builder",
+    "vue",
+    "vue3",
+    "web-components",
+    "esign",
+    "pdf-lib"
+  ],
+  "homepage": "https://docs.signkit.dev/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sign-kit/core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sign-kit/core/issues"
+  },
   "sponsor": {
     "url": "https://ko-fi.com/P5P22RTZ6"
   },
