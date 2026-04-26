@@ -37,5 +37,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           secrets: |
             CLOUDFLARE_API_TOKEN
-          command: pages deploy packages/demo/dist --project-name=signkit-demo --name=demo.signkit.dev
-
+          command: pages deploy packages/demo/dist --project-name=signkit-demo --name=signkit-demo --branch=master
