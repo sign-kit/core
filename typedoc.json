@@ -10,6 +10,6 @@
     "excludePrivate": true,
     "excludeProtected": true,
     "readme": "none",
-    "name": "@sign-kit/core Types",
+    "name": "@signkit/core Types",
     "hideGenerator": true
 }

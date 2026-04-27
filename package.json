@@ -15,8 +15,8 @@
     "dev:demo": "npm --workspace=demo run dev",
     "dev:docs": "npm --workspace=docs run docs:dev",
     "test": "npm run test --workspaces",
-    "test:e2e": "npm --workspace=@sign-kit/core run build:wc && npx playwright test",
-    "test:e2e:headed": "npm --workspace=@sign-kit/core run build:wc && npx playwright test --headed",
+    "test:e2e": "npm --workspace=@signkit/core run build:wc && npx playwright test",
+    "test:e2e:headed": "npm --workspace=@signkit/core run build:wc && npx playwright test --headed",
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:skip-build": "npx playwright test",
     "test:artifacts": "npx playwright test tests/e2e/artifact-smoke.spec.ts",
@@ -26,7 +26,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@sign-kit/core": "^0.1.0",
+    "@signkit/core": "^0.1.0",
     "pdfjs-dist": "^5.6.205",
     "puppeteer": "^24.42.0"
   },

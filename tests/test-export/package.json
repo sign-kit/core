@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@sign-kit/core": "file:../tmp-pack/sign-kit-core-0.1.0.tgz",
+    "@signkit/core": "file:../tmp-pack/sign-kit-core-0.1.0.tgz",
     "vue": "beta"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "npm --workspace=@sign-kit/core run build:types && vite preview"
+    "preview": "npm --workspace=@signkit/core run build:types && vite preview"
   },
   "dependencies": {
     "pdfjs-dist": "^2.16.105",
