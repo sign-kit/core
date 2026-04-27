@@ -1,0 +1,56 @@
+name: Release - Build & Publish to npm
+
+# Triggered when a GitHub Release is published.
+# The release tag must be a semver string prefixed with "v" (e.g. v1.2.3).
+# The workflow:
+#   1. Validates the tag format and strips the "v" prefix.
+#   2. Delegates setup, version-stamp, and build to the build-library composite action.
+#   3. Publishes @sign-kit/core to npm with OIDC-backed provenance attestation.
+#
+# Required repository secret:
+#   NPM_TOKEN - npm automation token with publish access to @sign-kit/core.
+#   (Provenance/OIDC attestation is handled automatically via `--provenance`.)
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Publish @sign-kit/core
+    runs-on: ubuntu-latest
+
+    # id-token:write is required for npm provenance (OIDC).
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # -- 1. Parse & validate tag --------------------------------------------
+      - name: Validate release tag and extract version
+        id: version
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._-]+)?$ ]]; then
+            echo "::error::Release tag '$TAG' is not a valid semver (expected vX.Y.Z or vX.Y.Z-prerelease)"
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $VERSION"
+
+      # -- 2. Setup + stamp version + build ----------------------------------
+      - name: Build library
+        uses: ./.github/actions/build-library
+        with:
+          version: ${{ steps.version.outputs.version }}
+
+      # -- 3. Publish ---------------------------------------------------------
+      - name: Publish to npm (with OIDC provenance)
+        working-directory: packages/pdf-sign-kit
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
