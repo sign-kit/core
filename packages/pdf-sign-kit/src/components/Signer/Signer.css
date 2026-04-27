@@ -1,0 +1,283 @@
+/* =============================================================
+   Signer component styles — imported ?inline by register.ts
+   for WC shadow-DOM builds.  Mirrors the <style scoped> blocks
+   across Signer.vue, FieldInput.vue, SignaturePad.vue,
+   SignatureChoiceModal.vue and IntegrityBanner.vue without scope
+   IDs so they work inside the shadow root.
+   ============================================================= */
+
+/* ── Root layout ── */
+.signer-root {
+  font-family: var(--sk-font-family-sans);
+}
+.pages {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+}
+.page-canvas-wrap {
+  position: relative;
+  background: var(--sk-color-bg-surface-subtle);
+}
+.page-canvas {
+  display: block;
+}
+.overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: auto;
+}
+
+/* ── Field overlays ── */
+.field-overlay {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: auto;
+  overflow: hidden;
+}
+.field-overlay.field-type-signature,
+.field-overlay.field-type-initials {
+  border: var(--sk-field-border-width) solid var(--sk-field-accent);
+  background: var(--sk-field-accent-rgba);
+  border-radius: var(--sk-radius-sm);
+  padding: 4px;
+}
+.field-overlay.field-type-signature .signature-field.empty .empty-placeholder,
+.field-overlay.field-type-initials .signature-field.empty .empty-placeholder {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+.field-overlay .signature-field {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.field-overlay .signature-field.empty .empty-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sk-color-bg-surface-subtle);
+  box-shadow: var(--sk-shadow-sm);
+  border: 1px dashed var(--sk-color-border-default);
+  border-radius: var(--sk-radius-sm);
+  color: var(--sk-color-text-primary);
+  font-weight: 600;
+  text-align: center;
+  padding: 4px;
+  cursor: pointer;
+}
+.field-overlay input[type='text'],
+.field-overlay input[type='date'] {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ── FieldInput (signature field) ── */
+.signature-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+}
+.empty-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sk-color-bg-surface-subtle);
+  box-shadow: var(--sk-shadow-sm);
+  border: 1px dashed var(--sk-color-border-default);
+  border-radius: var(--sk-radius-sm);
+  color: var(--sk-color-text-primary);
+  font-weight: 600;
+  text-align: center;
+  padding: 4px;
+  cursor: pointer;
+}
+.sig-preview {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.empty-sig {
+  font-size: 12px;
+  color: var(--sk-color-text-secondary);
+}
+.sig-actions button {
+  margin-right: 6px;
+}
+
+/* ── IntegrityBanner ── */
+.integrity-banner {
+  background: var(--sk-color-bg-surface-subtle);
+  padding: 6px;
+  margin-bottom: 8px;
+  border: 1px solid var(--sk-color-border-default);
+}
+
+/* ── SignaturePad (drawing canvas) ── */
+.signature-pad {
+  position: relative;
+  user-select: none;
+  background: var(--sk-field-accent-rgba);
+  padding: 8px;
+  border-radius: var(--sk-radius-sm);
+  box-shadow: var(--sk-shadow-sm);
+}
+.sig-canvas {
+  display: block;
+  touch-action: none;
+  background: #fff;
+  border: var(--sk-field-border-width) solid var(--sk-field-accent);
+  border-radius: var(--sk-radius-sm);
+  width: 100%;
+  height: auto;
+}
+.controls {
+  position: static;
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.controls button {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--sk-color-border-default);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--sk-color-text-primary);
+  font-weight: 600;
+}
+
+/* ── SignatureChoiceModal ── */
+.modal-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal {
+  background: var(--sk-color-bg-surface);
+  padding: 18px;
+  border-radius: var(--sk-radius-lg);
+  min-width: 320px;
+  max-width: min(30vw, 760px);
+  width: 50vw;
+  box-shadow: var(--sk-shadow-lg);
+}
+.modal > h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  text-align: left;
+}
+.choice-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.choice-tabs button {
+  padding: 6px 10px;
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-color-border-default);
+  background: var(--sk-color-bg-surface);
+  cursor: pointer;
+  color: var(--sk-color-text-primary);
+}
+.choice-tabs button.active {
+  background: var(--sk-color-action-primary);
+  color: var(--sk-color-on-action);
+  border-color: var(--sk-color-action-primary);
+}
+.choice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.choice-body input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-color-border-default);
+  box-sizing: border-box;
+  font-size: 14px;
+}
+.choice-body .pad-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  min-height: 140px;
+  background: var(--sk-field-accent-rgba);
+  border-radius: var(--sk-radius-sm);
+  box-shadow: var(--sk-shadow-sm);
+}
+.modal-preview {
+  margin-top: 8px;
+}
+.modal-preview canvas {
+  width: 100%;
+  height: auto;
+  border: var(--sk-field-border-width) solid var(--sk-field-accent);
+  border-radius: var(--sk-radius-sm);
+  margin-top: 5px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.modal-actions button {
+  padding: 8px 12px;
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-color-border-default);
+  background: var(--sk-color-bg-surface);
+  cursor: pointer;
+  font-weight: 600;
+}
+.modal-actions button.primary {
+  background: var(--sk-color-action-primary);
+  color: var(--sk-color-on-action);
+  border: none;
+}
+.modal-actions button.secondary {
+  background: transparent;
+  color: var(--sk-color-text-secondary);
+  border: 1px solid var(--sk-color-border-default);
+}
+.modal-actions button:hover {
+  transform: translateY(-1px);
+}
+
+/* ── Finalize actions area ── */
+.actions {
+  margin-top: 12px;
+}
+.errors {
+  color: var(--sk-color-action-danger);
+}
