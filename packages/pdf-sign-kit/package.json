@@ -1,8 +1,7 @@
 {
-  "name": "@sign-kit/core",
+  "name": "@signkit/core",
   "version": "0.0.0",
   "description": "Client-first Vue 3 toolkit for building PDF form templates and collecting signatures in the browser — no backend required.",
-  "license": "Apache-2.0",
   "keywords": [
     "pdf",
     "signature",
@@ -15,27 +14,16 @@
     "pdf-lib"
   ],
   "homepage": "https://docs.signkit.dev/",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sign-kit/core.git"
-  },
   "bugs": {
     "url": "https://github.com/sign-kit/core/issues"
   },
-  "sponsor": {
-    "url": "https://ko-fi.com/P5P22RTZ6"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sign-kit/core.git"
   },
-  "author": {
-    "name": "Marcello Bachechi",
-    "url": "https://github.com/pilotkid"
-  },
-  "main": "dist/pdf-sign-kit.cjs.js",
-  "module": "dist/pdf-sign-kit.es.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "style": "dist/styles/index.css",
+  "license": "Apache-2.0",
+  "author": "Marcello Bachechi (https://github.com/pilotkid)",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -45,6 +33,14 @@
     "./webcomponents": "./dist/pdf-sign-kit.wc.iife.js",
     "./styles.css": "./dist/styles/index.css"
   },
+  "main": "dist/pdf-sign-kit.cjs.js",
+  "types": "dist/index.d.ts",
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build:types": "node -e \"try{require('fs').rmSync('tsconfig.tsbuildinfo')}catch(_){}\" && vue-tsc -p tsconfig.json",
     "build:lib": "vite build --config vite.lib.config.ts",
@@ -53,8 +49,8 @@
     "build": "npm run build:types && npm run build:lib && npm run build:wc && npm run build:copy-styles",
     "test": "vitest"
   },
-  "peerDependencies": {
-    "vue": "^3.2"
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
@@ -64,7 +60,12 @@
     "vue": "^3.2",
     "vue-tsc": "^3.2.7"
   },
-  "dependencies": {
-    "pdf-lib": "^1.17.1"
-  }
+  "peerDependencies": {
+    "vue": "^3.2"
+  },
+  "sponsor": {
+    "url": "https://ko-fi.com/P5P22RTZ6"
+  },
+  "module": "dist/pdf-sign-kit.es.js",
+  "style": "dist/styles/index.css"
 }
