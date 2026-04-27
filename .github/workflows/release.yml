@@ -4,7 +4,7 @@ name: Release - Build & Publish to npm
 # The release tag must be a semver string prefixed with "v" (e.g. v1.2.3).
 # The workflow:
 #   1. Validates the tag format and strips the "v" prefix.
-#   2. Delegates setup, version-stamp, and build to the build-library composite action.
+#   2. Stamp version and build the library (steps inlined below).
 #   3. Publishes @sign-kit/core to npm with OIDC-backed provenance attestation.
 #
 # Required repository secret:
@@ -43,10 +43,45 @@ jobs:
           echo "Resolved version: $VERSION"
 
       # -- 2. Setup + stamp version + build ----------------------------------
-      - name: Build library
-        uses: ./.github/workflows/build-library/release.yml
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: ${{ steps.version.outputs.version }}
+          node-version: 'latest'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci
+
+      - name: Stamp version into package.json
+        shell: bash
+        working-directory: packages/pdf-sign-kit
+        run: |
+          npm version "${{ steps.version.outputs.version }}" \
+            --no-git-tag-version \
+            --allow-same-version
+          echo "packages/pdf-sign-kit version set to ${{ steps.version.outputs.version }}"
+
+      - name: Build types
+        shell: bash
+        working-directory: packages/pdf-sign-kit
+        run: npm run build:types
+
+      - name: Build ESM + CJS bundles
+        shell: bash
+        working-directory: packages/pdf-sign-kit
+        run: npm run build:lib
+
+      - name: Build Web Component IIFE bundle
+        shell: bash
+        working-directory: packages/pdf-sign-kit
+        run: npm run build:wc
+
+      - name: Copy styles to dist
+        shell: bash
+        working-directory: packages/pdf-sign-kit
+        run: npm run build:copy-styles
 
       # -- 3. Publish ---------------------------------------------------------
       - name: Publish to npm (with OIDC provenance)
