@@ -44,7 +44,7 @@ jobs:
 
       # -- 2. Setup + stamp version + build ----------------------------------
       - name: Build library
-        uses: ./.github/actions/build-library
+        uses: ./.github/workflows/build-library/release.yml
         with:
           version: ${{ steps.version.outputs.version }}
 

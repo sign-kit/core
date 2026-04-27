@@ -1,6 +1,6 @@
 {
   "name": "@sign-kit/core",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Client-first Vue 3 toolkit for building PDF form templates and collecting signatures in the browser — no backend required.",
   "license": "Apache-2.0",
   "keywords": [
