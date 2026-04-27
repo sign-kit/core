@@ -1,5 +1,5 @@
 <script setup>
-import { FormBuilder } from '@sign-kit/core';
+import { FormBuilder, Signer } from '@sign-kit/core';
 import '@sign-kit/core/styles.css';
 import { ref } from 'vue';
 const template = ref({
@@ -48,5 +48,8 @@ const template = ref({
 </script>
 
 <template>
-  <FormBuilder pdf="/sample.pdf" v-model="template" />
+  <div style="display: flex; flex-direction: column; gap: 20px">
+    <FormBuilder pdf="/sample.pdf" v-model="template" />
+    <Signer pdfSrc="/sample.pdf" :template="template" />
+  </div>
 </template>
