@@ -52,7 +52,7 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: npm ci
+        run: npm i
 
       - name: Stamp version into package.json
         shell: bash
