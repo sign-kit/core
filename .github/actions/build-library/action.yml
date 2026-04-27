@@ -1,62 +1,39 @@
-name: Build @sign-kit/core library
-description: >
-  Sets up Node, installs workspace dependencies, stamps the library version,
-  then runs all four build steps (types → ESM/CJS → WC IIFE → copy-styles).
+name: Build Library
+
+description: |
+  Composite action to setup Node, stamp the package version, and build the repository
 
 inputs:
   version:
-    description: >
-      Exact semver string to write into packages/pdf-sign-kit/package.json
-      before building (e.g. "1.2.3" or "1.2.3-PR-7"). Must not include a
-      leading "v" prefix.
+    description: Semver version to write into packages/pdf-sign-kit/package.json
     required: true
   node-version:
-    description: Node.js version to use.
+    description: Node.js version to use for the build
     required: false
-    default: '20'
+    default: '18'
 
 runs:
   using: composite
   steps:
-    # -- Node / npm ------------------------------------------------------------
-    - name: Setup Node.js
+    - name: Setup Node
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
         cache: npm
-        registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
-      shell: bash
-      run: npm i
+      run: npm ci
 
-    # -- Version stamp ---------------------------------------------------------
-    - name: Stamp version into package.json
+    - name: Stamp package version
       shell: bash
-      working-directory: packages/pdf-sign-kit
+      env:
+        VERSION: ${{ inputs.version }}
       run: |
-        npm version "${{ inputs.version }}" \
-          --no-git-tag-version \
-          --allow-same-version
-        echo "packages/pdf-sign-kit version set to ${{ inputs.version }}"
+        if [ -z "$VERSION" ]; then
+          echo "No version provided; skipping version stamping"
+        else
+          node -e "const fs=require('fs'); const path='./packages/pdf-sign-kit/package.json'; const p=JSON.parse(fs.readFileSync(path)); p.version=process.env.VERSION; fs.writeFileSync(path, JSON.stringify(p,null,2)+"\n"); console.log('Stamped',path,'->',process.env.VERSION)"
+        fi
 
-    # -- Build -----------------------------------------------------------------
-    - name: Build types
-      shell: bash
-      working-directory: packages/pdf-sign-kit
-      run: npm run build:types
-
-    - name: Build ESM + CJS bundles
-      shell: bash
-      working-directory: packages/pdf-sign-kit
-      run: npm run build:lib
-
-    - name: Build Web Component IIFE bundle
-      shell: bash
-      working-directory: packages/pdf-sign-kit
-      run: npm run build:wc
-
-    - name: Copy styles to dist
-      shell: bash
-      working-directory: packages/pdf-sign-kit
-      run: npm run build:copy-styles
+    - name: Build packages
+      run: npm run build

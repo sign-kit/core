@@ -9,6 +9,6 @@ on:
 
 jobs:
   tests:
-    uses: ./.github/actions/build-library/reusable-tests.yml
+    uses: ./.github/workflows/build-library/reusable-tests.yml
     with:      
       run-e2e: true
