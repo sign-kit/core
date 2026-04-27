@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
-  title: '@sign-kit/core',
+  title: '@signkit/core',
   description: 'Client-first Vue 3 toolkit for building PDF signing experiences in the browser',
   lang: 'en-US',
 
@@ -16,7 +16,7 @@ export default defineConfig({
     logo: {
       src: '/logo-horizontal-dev.png',
       height: 36,
-      alt: '@sign-kit/core Logo',
+      alt: '@signkit/core Logo',
     },
 
     nav: [

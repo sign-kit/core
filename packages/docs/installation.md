@@ -3,19 +3,19 @@
 ## NPM
 
 ```bash
-npm install @sign-kit/core
+npm install @signkit/core
 ```
 
 ## Yarn
 
 ```bash
-yarn add @sign-kit/core
+yarn add @signkit/core
 ```
 
 ## PNPM
 
 ```bash
-pnpm add @sign-kit/core
+pnpm add @signkit/core
 ```
 
 ## Requirements
@@ -32,8 +32,8 @@ Import components directly in your Vue app:
 
 ```vue
 <script setup>
-import { FormBuilder, Signer } from '@sign-kit/core'
-import '@sign-kit/core/dist/style.css'
+import { FormBuilder, Signer } from '@signkit/core'
+import '@signkit/core/dist/style.css'
 </script>
 
 <template>
@@ -47,12 +47,12 @@ import '@sign-kit/core/dist/style.css'
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="https://unpkg.com/@sign-kit/core@latest/dist/web-components.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@signkit/core@latest/dist/web-components.css" />
   </head>
   <body>
     <pdf-form-builder pdf="/sample.pdf"></pdf-form-builder>
     
-    <script src="https://unpkg.com/@sign-kit/core@latest/dist/web-components.js"></script>
+    <script src="https://unpkg.com/@signkit/core@latest/dist/web-components.js"></script>
     <script>
       const builder = document.querySelector('pdf-form-builder')
       builder.addEventListener('template-updated', (e) => {
@@ -65,12 +65,12 @@ import '@sign-kit/core/dist/style.css'
 
 ### Web Components (React)
 
-After installing `@sign-kit/core`, register the custom elements once and render them like normal JSX tags.
+After installing `@signkit/core`, register the custom elements once and render them like normal JSX tags.
 
 ```tsx
 import { useEffect, useRef } from 'react'
-import '@sign-kit/core/webcomponents'
-import '@sign-kit/core/styles.css'
+import '@signkit/core/webcomponents'
+import '@signkit/core/styles.css'
 
 export default function SignKitReactExample() {
   const builderRef = useRef<HTMLElement | null>(null)
@@ -112,7 +112,7 @@ declare module 'react/jsx-runtime' {
 All components and utilities are fully typed. Types are auto-included:
 
 ```typescript
-import type { Template, Field, Manifest } from '@sign-kit/core'
+import type { Template, Field, Manifest } from '@signkit/core'
 
 const template: Template = {
   id: 't1',
@@ -127,7 +127,7 @@ const template: Template = {
 Import CSS to apply default styling:
 
 ```javascript
-import '@sign-kit/core/dist/style.css'
+import '@signkit/core/dist/style.css'
 ```
 
 All CSS custom properties (tokens) can be overridden:

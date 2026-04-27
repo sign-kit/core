@@ -1,5 +1,5 @@
 /**
- * Stable DOM selectors for the @sign-kit/core demo app.
+ * Stable DOM selectors for the @signkit/core demo app.
  *
  * Keep selectors as specific as needed but avoid binding to text labels that
  * may change.  Where possible use structural / class selectors instead.

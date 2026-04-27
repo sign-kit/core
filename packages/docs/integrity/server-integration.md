@@ -1,6 +1,6 @@
 # Server Integration
 
-Learn how to integrate server-backed PKI signing with `@sign-kit/core` for legally binding signatures.
+Learn how to integrate server-backed PKI signing with `@signkit/core` for legally binding signatures.
 
 ## Overview
 

@@ -8,7 +8,7 @@
  *   npx playwright test tests/e2e/artifact-smoke.spec.ts
  *
  * Pre-requisites (run once before this spec):
- *   npm --workspace=@sign-kit/core run build
+ *   npm --workspace=@signkit/core run build
  *
  * The tests skip gracefully when dist/ artifacts are absent so that CI
  * runs focused on other specs are not blocked.

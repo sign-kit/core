@@ -1,8 +1,8 @@
-# @sign-kit/core
+# @signkit/core
 
 Client-first Vue 3 toolkit for building PDF form templates and collecting signatures — entirely in the browser, no backend required.
 
-[![npm](https://img.shields.io/npm/v/@sign-kit/core)](https://www.npmjs.com/package/@sign-kit/core)
+[![npm](https://img.shields.io/npm/v/@signkit/core)](https://www.npmjs.com/package/@signkit/core)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/sign-kit/core/blob/main/LICENSE)
 
 **[Live Demo](https://demo.signkit.dev/) · [Documentation](https://docs.signkit.dev/) · [GitHub](https://github.com/sign-kit/core)**
@@ -15,7 +15,7 @@ Client-first Vue 3 toolkit for building PDF form templates and collecting signat
 
 ## What it does
 
-`@sign-kit/core` gives you two components:
+`@signkit/core` gives you two components:
 
 - **`<FormBuilder>`** — Load a PDF, drag and drop signature/text/date/checkbox fields onto pages, and export a reusable template JSON.
 - **`<Signer>`** — Load a PDF + template JSON, let users draw or type signatures and fill fields, then produce a signed PDF and a manifest JSON describing every field value and signing metadata.
@@ -27,7 +27,7 @@ Everything runs client-side via [pdf.js](https://mozilla.github.io/pdf.js/) for 
 ## Installation
 
 ```bash
-npm install @sign-kit/core
+npm install @signkit/core
 ```
 
 `pdfjs-dist` is a peer dependency. If you don't already have it:
@@ -45,7 +45,7 @@ npm install pdfjs-dist
 Add this once in your app entry (e.g. `main.ts`):
 
 ```ts
-import '@sign-kit/core/styles.css'
+import '@signkit/core/styles.css'
 ```
 
 ### 2. Form Builder
@@ -55,8 +55,8 @@ Let users design a signing template by placing fields on a PDF:
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FormBuilder } from '@sign-kit/core'
-import type { Template } from '@sign-kit/core'
+import { FormBuilder } from '@signkit/core'
+import type { Template } from '@signkit/core'
 
 const template = ref<Template | null>(null)
 </script>
@@ -79,8 +79,8 @@ Present the saved template to a signer and collect their signature:
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Signer } from '@sign-kit/core'
-import type { Template, Manifest } from '@sign-kit/core'
+import { Signer } from '@signkit/core'
+import type { Template, Manifest } from '@signkit/core'
 
 const props = defineProps<{
   template: Template
@@ -115,7 +115,7 @@ If you're not using Vue, the components are also available as standard custom el
 ### Script tag (CDN / vanilla HTML)
 
 ```html
-<script src="https://unpkg.com/@sign-kit/core/dist/pdf-sign-kit.wc.iife.js"></script>
+<script src="https://unpkg.com/@signkit/core/dist/pdf-sign-kit.wc.iife.js"></script>
 
 <!-- Form Builder -->
 <pdf-form-builder id="builder"></pdf-form-builder>
@@ -147,7 +147,7 @@ If you're not using Vue, the components are also available as standard custom el
 ### npm bundler
 
 ```ts
-import '@sign-kit/core/webcomponents'
+import '@signkit/core/webcomponents'
 // then use <pdf-form-builder> and <pdf-form-signer> in your HTML/templates
 ```
 

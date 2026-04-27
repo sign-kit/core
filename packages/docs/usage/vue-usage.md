@@ -15,8 +15,8 @@ The `FormBuilder` component lets users design PDF templates by placing and confi
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FormBuilder } from '@sign-kit/core'
-import '@sign-kit/core/dist/style.css'
+import { FormBuilder } from '@signkit/core'
+import '@signkit/core/dist/style.css'
 
 const pdfUrl = ref('/sample.pdf')
 const template = ref({
@@ -78,8 +78,8 @@ The `Signer` component lets users fill fields, draw/type signatures, and export 
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Signer } from '@sign-kit/core'
-import type { Manifest } from '@sign-kit/core'
+import { Signer } from '@signkit/core'
+import type { Manifest } from '@signkit/core'
 
 const pdfUrl = ref('/sample.pdf')
 const template = ref({ /* ... */ })
@@ -146,7 +146,7 @@ Manage signer state programmatically:
 
 ```vue
 <script setup lang="ts">
-import { useSignerManager } from '@sign-kit/core'
+import { useSignerManager } from '@signkit/core'
 
 const pdfBytes = await fetch('/sample.pdf').then(r => r.arrayBuffer())
 const template = { /* ... */ }

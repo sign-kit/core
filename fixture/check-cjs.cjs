@@ -1,11 +1,11 @@
 /**
- * CJS require check for the installed @sign-kit/core package.
+ * CJS require check for the installed @signkit/core package.
  *
  * Run from within the fixture/ directory after `npm install`:
  *   node check-cjs.cjs
  *
  * The .cjs extension forces CommonJS mode regardless of the fixture's
- * package.json "type": "module". Node resolves @sign-kit/core to the
+ * package.json "type": "module". Node resolves @signkit/core to the
  * "require" condition in its exports map → dist/pdf-sign-kit.cjs.js.
  *
  * Verifies the same exports as the ESM check but through the CJS entry.
@@ -13,7 +13,7 @@
 
 'use strict';
 
-const pkg = require('@sign-kit/core');
+const pkg = require('@signkit/core');
 
 const expectations = [
   ['FormBuilder', 'object'],

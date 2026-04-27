@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for considering contributing to `@sign-kit/core`! This guide covers development setup, testing, and PR expectations.
+Thank you for considering contributing to `@signkit/core`! This guide covers development setup, testing, and PR expectations.
 
 ## Getting Started
 
@@ -43,7 +43,7 @@ npm run build
 
 ```
 packages/
-  pdf-sign-kit/          # Publishable library (@sign-kit/core)
+  pdf-sign-kit/          # Publishable library (@signkit/core)
     src/
       components/        # Vue 3 components
       composables/       # Vue 3 composables

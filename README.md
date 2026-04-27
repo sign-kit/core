@@ -1,17 +1,17 @@
 <div align="center">
-  <img src="packages/docs/public/logo-horizontal-dev.png" alt="@sign-kit/core" height="60" />
+  <img src="packages/docs/public/logo-horizontal-dev.png" alt="@signkit/core" height="60" />
   <br /><br />
   <strong>Client-first Vue 3 toolkit for building PDF form templates and collecting signatures — entirely in the browser.</strong>
   <br /><br />
 
-  [![npm](https://img.shields.io/npm/v/@sign-kit/core)](https://www.npmjs.com/package/@sign-kit/core)
+  [![npm](https://img.shields.io/npm/v/@signkit/core)](https://www.npmjs.com/package/@signkit/core)
   [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
   [![docs](https://img.shields.io/badge/docs-docs.signkit.dev-4ECDC4)](https://docs.signkit.dev/)
   [![demo](https://img.shields.io/badge/demo-live-4381C1)](https://demo.signkit.dev/)
 
   <br />
 
-  **[Documentation](https://docs.signkit.dev/) · [Live Demo](https://demo.signkit.dev/) · [npm](https://www.npmjs.com/package/@sign-kit/core)**
+  **[Documentation](https://docs.signkit.dev/) · [Live Demo](https://demo.signkit.dev/) · [npm](https://www.npmjs.com/package/@signkit/core)**
 
   <br />
 
@@ -24,7 +24,7 @@
 
 ## What is this?
 
-`@sign-kit/core` lets you add PDF signing workflows to any web app with two Vue 3 components — no backend, no API keys, no third-party services required.
+`@signkit/core` lets you add PDF signing workflows to any web app with two Vue 3 components — no backend, no API keys, no third-party services required.
 
 - **Form Builder** — load any PDF, drag and drop fields (signature, text, date, checkbox, initials) onto the pages, and export a reusable `template.json`.
 - **Signer** — load a PDF + template, collect the signer's input, and produce a signed PDF (`Uint8Array`) and a `manifest.json` recording every field value and integrity hashes.
@@ -67,7 +67,7 @@ This is an npm workspace monorepo. There are three packages under `packages/`:
 
 | Package | Purpose |
 |---|---|
-| [`packages/pdf-sign-kit`](packages/pdf-sign-kit) | The publishable library — Vue components, composables, utilities, and types. This is what gets installed from npm as `@sign-kit/core`. |
+| [`packages/pdf-sign-kit`](packages/pdf-sign-kit) | The publishable library — Vue components, composables, utilities, and types. This is what gets installed from npm as `@signkit/core`. |
 | [`packages/demo`](packages/demo) | A minimal Vite + Vue app that showcases the Form Builder, Signer, Integrity checker, and Web Component wrappers side by side. |
 | [`packages/docs`](packages/docs) | The [VitePress documentation site](https://docs.signkit.dev/) — getting started, API reference, usage guides, and the integrity/security overview. |
 
@@ -104,7 +104,7 @@ npm run build
 Install in your own project:
 
 ```bash
-npm install @sign-kit/core
+npm install @signkit/core
 ```
 
 Then see the [Getting Started guide](https://docs.signkit.dev/getting-started) and the [package README](packages/pdf-sign-kit/README.md) for component usage, web component setup, and theming.

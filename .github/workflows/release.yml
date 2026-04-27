@@ -5,10 +5,10 @@ name: Release - Build & Publish to npm
 # The workflow:
 #   1. Validates the tag format and strips the "v" prefix.
 #   2. Stamp version and build the library (steps inlined below).
-#   3. Publishes @sign-kit/core to npm with OIDC-backed provenance attestation.
+#   3. Publishes @signkit/core to npm with OIDC-backed provenance attestation.
 #
 # Required repository secret:
-#   NPM_TOKEN - npm automation token with publish access to @sign-kit/core.
+#   NPM_TOKEN - npm automation token with publish access to @signkit/core.
 #   (Provenance/OIDC attestation is handled automatically via `--provenance`.)
 
 on:
@@ -17,7 +17,7 @@ on:
 
 jobs:
   publish:
-    name: Publish @sign-kit/core
+    name: Publish @signkit/core
     runs-on: ubuntu-latest
 
     # id-token:write is required for npm provenance (OIDC).

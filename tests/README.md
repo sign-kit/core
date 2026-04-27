@@ -1,4 +1,4 @@
-# E2E Tests — `@sign-kit/core`
+# E2E Tests — `@signkit/core`
 
 Playwright browser tests that verify the demo application's three core user flows and the web component event-payload contract. All tests run against a locally served instance of `packages/demo`.
 
@@ -10,7 +10,7 @@ Playwright browser tests that verify the demo application's three core user flow
 |---|---|
 | Node ≥ 18 | Required by Playwright |
 | Chromium browser | Installed automatically with `npx playwright install chromium` |
-| WC bundle | Required for web component tests only — build with `npm --workspace=@sign-kit/core run build:wc` |
+| WC bundle | Required for web component tests only — build with `npm --workspace=@signkit/core run build:wc` |
 
 ---
 

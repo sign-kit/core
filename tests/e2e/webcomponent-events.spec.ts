@@ -12,7 +12,7 @@
  *  - The WebComponentPage's own manifest <pre> is populated after finalize
  *
  * Pre-requisite: the WC bundle must be built before running these tests.
- *   npm --workspace=@sign-kit/core run build:wc
+ *   npm --workspace=@signkit/core run build:wc
  *
  * The test skips gracefully when the WC bundle is not available (the page
  * will still load but custom elements will not be registered).
@@ -95,7 +95,7 @@ test.describe('Web component presence and registration', () => {
     if (!registered) {
       test.skip(
         true,
-        'WC bundle not loaded — run `npm --workspace=@sign-kit/core run build:wc` first',
+        'WC bundle not loaded — run `npm --workspace=@signkit/core run build:wc` first',
       );
       return;
     }

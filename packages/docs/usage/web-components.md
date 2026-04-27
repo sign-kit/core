@@ -1,6 +1,6 @@
 # Web Components
 
-Use `@sign-kit/core` as Web Components (custom HTML elements) in any HTML/JS framework.
+Use `@signkit/core` as Web Components (custom HTML elements) in any HTML/JS framework.
 
 ## Overview
 
@@ -14,10 +14,10 @@ Web Components allow you to use the library without Vue:
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="https://unpkg.com/@sign-kit/core/dist/web-components.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@signkit/core/dist/web-components.css" />
   </head>
   <body>
-    <script src="https://unpkg.com/@sign-kit/core/dist/web-components.js"></script>
+    <script src="https://unpkg.com/@signkit/core/dist/web-components.js"></script>
   </body>
 </html>
 ```
@@ -141,7 +141,7 @@ Web Components allow you to use the library without Vue:
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="https://unpkg.com/@sign-kit/core/dist/web-components.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@signkit/core/dist/web-components.css" />
   </head>
   <body>
     <div id="app">
@@ -149,7 +149,7 @@ Web Components allow you to use the library without Vue:
       <div id="container"></div>
     </div>
 
-    <script src="https://unpkg.com/@sign-kit/core/dist/web-components.js"></script>
+    <script src="https://unpkg.com/@signkit/core/dist/web-components.js"></script>
     <script>
       let stage = 'builder' // or 'signer'
       let template = { id: 't1', fields: [], pages: [] }

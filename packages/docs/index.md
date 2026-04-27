@@ -1,4 +1,4 @@
-# @sign-kit/core
+# @signkit/core
 
 A **client-first Vue 3 + TypeScript** toolkit for building PDF signing experiences in the browser. Design form templates, let users draw/type signatures, and export signed PDFs-all offline, no backend required.
 
@@ -15,7 +15,7 @@ A **client-first Vue 3 + TypeScript** toolkit for building PDF signing experienc
 ## Quick Start
 
 ```bash
-npm install @sign-kit/core
+npm install @signkit/core
 ```
 
 ```vue
@@ -28,7 +28,7 @@ npm install @sign-kit/core
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FormBuilder, Signer } from '@sign-kit/core'
+import { FormBuilder, Signer } from '@signkit/core'
 
 const pdfUrl = ref('/sample.pdf')
 const template = ref({ id: 't1', fields: [], pages: [] })

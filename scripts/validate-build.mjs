@@ -2,7 +2,7 @@
 /**
  * validate-build.mjs
  *
- * Pre-publish validation script for @sign-kit/core.
+ * Pre-publish validation script for @signkit/core.
  *
  * Phases:
  *   1. Build the library (produces dist/ artifacts).
@@ -56,7 +56,7 @@ function section(title) {
 // ── Step 1: Build ──────────────────────────────────────────────────────────────
 
 if (!skipBuild) {
-  section('Step 1 · Build @sign-kit/core');
+  section('Step 1 · Build @signkit/core');
   run('npm run build', PKG_DIR, 'npm run build');
 } else {
   section('Step 1 · Build skipped (--skip-build)');
@@ -131,7 +131,7 @@ writeFileSync(
       private: true,
       type: 'module',
       dependencies: {
-        '@sign-kit/core': `file:../tmp-pack/${tgzName}`,
+        '@signkit/core': `file:../tmp-pack/${tgzName}`,
         vue: '^3.4.0',
       },
     },
@@ -141,7 +141,7 @@ writeFileSync(
 );
 
 run('npm install --no-package-lock', FIXTURE_DIR, 'npm install (fixture)');
-pass(`@sign-kit/core installed from ${tgzName}`);
+pass(`@signkit/core installed from ${tgzName}`);
 
 // ── Step 5: ESM import check ───────────────────────────────────────────────────
 

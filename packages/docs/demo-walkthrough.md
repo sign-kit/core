@@ -9,7 +9,7 @@ Visit our live demo at [https://demo.signkit.dev/](https://demo.signkit.dev/) to
 
 ## Run it Locally
 
-The easiest way to experience `@sign-kit/core` is through our interactive demo:
+The easiest way to experience `@signkit/core` is through our interactive demo:
 
 ```bash
 # From the root of the project

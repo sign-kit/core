@@ -1,11 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright E2E configuration for the @sign-kit/core demo app.
+ * Playwright E2E configuration for the @signkit/core demo app.
  *
  * Before running E2E tests for the first time:
  *   1. Build the WC bundle so /webcomponent route loads:
- *        npm --workspace=@sign-kit/core run build:wc
+ *        npm --workspace=@signkit/core run build:wc
  *   2. Install browser binaries (one-time per machine):
  *        npx playwright install --with-deps chromium
  *   3. Run tests:

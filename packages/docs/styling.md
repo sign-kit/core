@@ -1,6 +1,6 @@
 # Styling Guide
 
-Learn how to customize the appearance of `@sign-kit/core` components using CSS custom properties.
+Learn how to customize the appearance of `@signkit/core` components using CSS custom properties.
 
 ## CSS Custom Properties (Tokens)
 
@@ -320,7 +320,7 @@ If using Tailwind:
 
 ## Web Components: Shadow DOM + Constructable Stylesheets
 
-`@sign-kit/core` web components now inject shared styles directly into each component's shadow root at runtime using **Constructable Stylesheets** (`adoptedStyleSheets`).
+`@signkit/core` web components now inject shared styles directly into each component's shadow root at runtime using **Constructable Stylesheets** (`adoptedStyleSheets`).
 
 This gives you:
 
@@ -337,7 +337,7 @@ import {
   registerPdfSignKitElements,
   setPdfSignKitTheme,
   syncPdfSignKitThemeFromRoot,
-} from '@sign-kit/core/webcomponents'
+} from '@signkit/core/webcomponents'
 ```
 
 ### 1) Register Elements

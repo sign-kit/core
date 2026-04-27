@@ -1,6 +1,6 @@
 # Getting Started
 
-Welcome to `@sign-kit/core`. This guide covers core concepts and how the toolkit fits together.
+Welcome to `@signkit/core`. This guide covers core concepts and how the toolkit fits together.
 
 ## Core Concepts
 

@@ -1,5 +1,5 @@
 /**
- * ESM import check for the installed @sign-kit/core package.
+ * ESM import check for the installed @signkit/core package.
  *
  * Run from within the fixture/ directory after `npm install`:
  *   node check-esm.mjs
@@ -22,7 +22,7 @@ import {
   computeSha256,
   computeValuesHash,
   computePdfHash,
-} from '@sign-kit/core';
+} from '@signkit/core';
 
 /**
  * [name, expected typeof] pairs.

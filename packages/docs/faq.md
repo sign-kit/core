@@ -1,6 +1,6 @@
 # FAQ
 
-Common questions and answers about `@sign-kit/core`.
+Common questions and answers about `@signkit/core`.
 
 ## General Questions
 
@@ -52,7 +52,7 @@ Older browsers: use a polyfill or Vue components in an older-compatible environm
 
 ```vue
 <script setup>
-import { FormBuilder, Signer } from '@sign-kit/core'
+import { FormBuilder, Signer } from '@signkit/core'
 </script>
 
 <template>
@@ -71,7 +71,7 @@ Use Web Components:
 <pdf-form-builder pdf="/sample.pdf"></pdf-form-builder>
 <pdf-signer pdf="/sample.pdf" template='{ "id": "t1", "fields": [] }'></pdf-signer>
 
-    <script src="https://unpkg.com/@sign-kit/core/dist/web-components.js"></script>
+    <script src="https://unpkg.com/@signkit/core/dist/web-components.js"></script>
 ```
 
 See [Web Components](/usage/web-components).
@@ -256,7 +256,7 @@ if (manifest.signer.role === 'approver') {
 Yes. The library is fully typed:
 
 ```typescript
-import type { Template, Field, Manifest } from '@sign-kit/core'
+import type { Template, Field, Manifest } from '@signkit/core'
 
 const template: Template = { /* ... */ }
 const manifest: Manifest = { /* ... */ }

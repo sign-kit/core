@@ -2,12 +2,12 @@
 /**
  * copy-styles.js
  *
- * Assembles the distributable CSS for @sign-kit/core.
+ * Assembles the distributable CSS for @signkit/core.
  *
  * Produces two outputs in dist/styles/:
  *
  *   index.css  — fully inlined, import-free stylesheet that consumers can
- *                drop-in with a single `import '@sign-kit/core/styles.css'`.
+ *                drop-in with a single `import '@signkit/core/styles.css'`.
  *                Contains: design tokens + base UI styles + compiled Vue SFC
  *                component styles (from Vite's dist/style.css).
  *

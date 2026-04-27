@@ -1,6 +1,6 @@
-# Agents Guide for @sign-kit/core
+# Agents Guide for @signkit/core
 
-This file documents guidance for coding agents and contributors working on the `@sign-kit/core` repository. It captures project goals, constraints, preferred libraries, testing and release expectations, and rules for safe, maintainable changes.
+This file documents guidance for coding agents and contributors working on the `@signkit/core` repository. It captures project goals, constraints, preferred libraries, testing and release expectations, and rules for safe, maintainable changes.
 
 ## Project Overview
 
@@ -47,7 +47,7 @@ This file documents guidance for coding agents and contributors working on the `
 
 - Exports: Clean, explicit exports in `package.json` with TypeScript typings (`types`/`exports`). The library exports a compiled CSS file at `./styles.css`.
 - Monorepo layout: Three packages under `packages/`:
-  - `packages/pdf-sign-kit` — the publishable library (`@sign-kit/core`), with `src/components`, `src/composables`, `src/utils`, `src/styles`, and `src/web-components`.
+  - `packages/pdf-sign-kit` — the publishable library (`@signkit/core`), with `src/components`, `src/composables`, `src/utils`, `src/styles`, and `src/web-components`.
   - `packages/demo` — minimal Vite + Vue app showcasing form-builder and signer.
   - `packages/docs` — VitePress documentation site.
 - Styleguide: CSS design tokens live in `packages/pdf-sign-kit/src/styles/tokens.css` under the `--sk-` prefix. UI primitives use the `sk-` class prefix. Consumers override tokens on `:root` or a container; Shadow DOM elements inherit host-document CSS variables. See `STYLEGUIDE.MD` (root) and `packages/pdf-sign-kit/STYLEGUIDE.md` for full details.

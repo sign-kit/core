@@ -1,6 +1,6 @@
 <script setup>
-import { FormBuilder, Signer } from '@sign-kit/core';
-import '@sign-kit/core/styles.css';
+import { FormBuilder, Signer } from '@signkit/core';
+import '@signkit/core/styles.css';
 import { ref } from 'vue';
 const template = ref({
   id: 'demo-tmpl',

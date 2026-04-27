@@ -151,7 +151,7 @@ const signer = new Signer({
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Signer } from '@sign-kit/core'
+import { Signer } from '@signkit/core'
 
 const verificationResult = ref(null)
 const expectedHashes = ref({

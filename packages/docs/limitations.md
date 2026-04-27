@@ -1,6 +1,6 @@
 # Limitations & Scope
 
-This document clearly describes what `@sign-kit/core` does and doesn't do.
+This document clearly describes what `@signkit/core` does and doesn't do.
 
 ## What It Does
 
