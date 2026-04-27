@@ -1,11 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { canonicalizeTemplate, computePdfHash, computeValuesHash } from '../src/utils/signer';
+import { webcrypto as nodeCrypto } from 'crypto';
 
 // Ensure Web Crypto is available in Node test environment
 beforeAll(() => {
   if (!(globalThis as any).crypto || !(globalThis as any).crypto.subtle) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const nodeCrypto = require('crypto').webcrypto;
     (globalThis as any).crypto = nodeCrypto;
   }
 });

@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { ensurePdfRoot, migratePdfSourceFromLegacy } from '../src/utils/template';
+import { webcrypto as nodeCrypto } from 'crypto';
 
 beforeAll(() => {
   if (!(globalThis as any).crypto || !(globalThis as any).crypto.subtle) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const nodeCrypto = require('crypto').webcrypto;
     (globalThis as any).crypto = nodeCrypto;
   }
 });

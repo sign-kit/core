@@ -2,12 +2,14 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { useSignerManager } from '../src/composables/useSigner';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { webcrypto as nodeCrypto } from 'crypto';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 beforeAll(() => {
   if (!(globalThis as any).crypto || !(globalThis as any).crypto.subtle) {
-    // provide Node WebCrypto
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const nodeCrypto = require('crypto').webcrypto;
     (globalThis as any).crypto = nodeCrypto;
   }
 });

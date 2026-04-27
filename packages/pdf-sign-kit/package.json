@@ -42,7 +42,7 @@
     "dist"
   ],
   "scripts": {
-    "build:types": "node -e \"try{require('fs').rmSync('tsconfig.tsbuildinfo')}catch(_){}\" && vue-tsc -p tsconfig.json",
+    "build:types": "node -e \"(async()=>{try{(await import('fs')).rmSync('tsconfig.tsbuildinfo');}catch(_){} })()\" && vue-tsc -p tsconfig.json",
     "build:lib": "vite build --config vite.lib.config.ts",
     "build:wc": "vite build --config vite.wc.config.ts",
     "build:copy-styles": "node scripts/copy-styles.js",
