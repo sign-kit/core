@@ -107,7 +107,7 @@ watch(pageSizes, (sizes) => {
   try {
     console.debug(
       '[FormBuilder] pageSizes -> length=',
-      (sizes && sizes.length) || (sizes && sizes.value && sizes.value.length) || 0,
+      (sizes && sizes.length) || 0,
     );
   } catch (e) {
     console.debug('[FormBuilder] pageSizes -> (unable to read length)');

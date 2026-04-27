@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "noEmit": true,
+    "jsx": "preserve",
+    "paths": {
+      "@/*": [
+        "../tests/test-export/src/*"
+      ]
+    }
+  },
+  "include": [
+    "../tests/test-export/src/**/*",
+    "../tests/test-export/*.config.*"
+  ],
+  "exclude": [
+    "../tests/test-export/node_modules",
+    "../tests/test-export/dist"
+  ]
+}
