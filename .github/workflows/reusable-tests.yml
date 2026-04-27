@@ -6,7 +6,7 @@ on:
       node-version:
         description: Node.js version for the test run
         required: false
-        default: '18'
+        default: 'latest'
         type: string
       run-e2e:
         description: Whether to run Playwright browser E2E tests
