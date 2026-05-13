@@ -4,12 +4,13 @@ Learn how to customize the appearance of `@signkit/core` components using CSS cu
 
 ## CSS Custom Properties (Tokens)
 
-All components use CSS variables that you can override:
+All components use CSS variables that you can override ([all tokens can be found here](https://github.com/sign-kit/core/blob/master/packages/pdf-sign-kit/src/styles/tokens.css)):
 
 ```css
 :root {
   /* Colors */
   --sk-color-action-primary: #0066cc;
+  --sk-color-action-primary-hover:  
   --sk-color-action-hover: #0052a3;
   --sk-color-action-active: #004080;
   --sk-color-text-primary: #1a1a1a;
