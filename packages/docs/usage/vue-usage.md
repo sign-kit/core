@@ -16,7 +16,7 @@ The `FormBuilder` component lets users design PDF templates by placing and confi
 <script setup lang="ts">
 import { ref } from 'vue'
 import { FormBuilder } from '@signkit/core'
-import '@signkit/core/dist/style.css'
+import '@signkit/core/dist/styles.css'
 
 const pdfUrl = ref('/sample.pdf')
 const template = ref({

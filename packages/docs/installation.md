@@ -33,7 +33,7 @@ Import components directly in your Vue app:
 ```vue
 <script setup>
 import { FormBuilder, Signer } from '@signkit/core'
-import '@signkit/core/dist/style.css'
+import '@signkit/core/dist/styles.css'
 </script>
 
 <template>
@@ -127,7 +127,7 @@ const template: Template = {
 Import CSS to apply default styling:
 
 ```javascript
-import '@signkit/core/dist/style.css'
+import '@signkit/core/dist/styles.css'
 ```
 
 All CSS custom properties (tokens) can be overridden:
