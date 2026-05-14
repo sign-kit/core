@@ -81,6 +81,52 @@ export interface CheckboxField extends FieldBase {
 
 export type Field = SignatureField | TextField | DateField | CheckboxField | FieldBase;
 
+export type FieldInspectorControlType = 'text' | 'textarea' | 'checkbox' | 'select';
+
+export type FieldInspectorControlValue = string | number | boolean | null;
+
+export interface FieldInspectorOption {
+  label: string;
+  value: FieldInspectorControlValue;
+  disabled?: boolean;
+}
+
+export interface FieldInspectorControl {
+  /** Unique key for the inspector control row. */
+  key: string;
+  /** Input type rendered by the default field inspector. */
+  type: FieldInspectorControlType;
+  /** Human-readable label shown in the inspector. */
+  label: string;
+  /** Dot-path on the field object to read/write, e.g. `required` or `meta.assigneeId`. */
+  path: string;
+  /** Optional placeholder for text-like controls. */
+  placeholder?: string;
+  /** Optional helper text rendered below the control. */
+  helpText?: string;
+  /** Limit the control to matching field types when provided. */
+  fieldTypes?: FieldType[];
+  /** Options for `select` controls. */
+  options?: FieldInspectorOption[];
+}
+
+export interface FieldInspectorSlotProps {
+  /** The currently selected field from the template. */
+  field: Field;
+  /** Mutable draft copy used by the inspector before save. */
+  draft: Field;
+  /** Reads a value from the draft field using a dot-path. */
+  getValue: (path: string) => unknown;
+  /** Writes a value to the draft field using a dot-path. */
+  setValue: (path: string, value: unknown) => void;
+  /** Persists the current draft back to the template. */
+  save: () => void;
+  /** Removes the selected field from the template. */
+  remove: () => void;
+  /** Emits an immediate field patch without going through the draft helpers. */
+  updateField: (patch: Partial<Field> & { id: string }) => void;
+}
+
 export interface PageSize {
   width: number; // in PDF points or pixels depending on `unit`
   height: number;
@@ -175,6 +221,12 @@ export interface FormBuilderProps {
   initialZoom?: number;
   /** BCP-47 locale used when formatting date fields (e.g. `'en-US'`). */
   dateLocale?: string | null;
+  /** Additional controls rendered in the field inspector after the built-in rows. */
+  fieldInspectorControls?: FieldInspectorControl[];
+  /** When `false`, hides the built-in `label`, `required`, and `role` controls. */
+  showDefaultInspectorControls?: boolean;
+  /** Built-in inspector control keys to omit while keeping the rest. */
+  omitDefaultInspectorControls?: string[];
 }
 
 /** Signer identity passed to the `<Signer>` component. */

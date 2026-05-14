@@ -20,7 +20,7 @@
         :onSelect="onFieldSelect"
       />
 
-      <div style="display: flex; flex-direction: column; gap: 12px">
+      <div class="pdf-builder__sidebar">
         <FieldPalette
           :fieldTypes="fieldTypes"
           :activeType="activeType"
@@ -28,11 +28,19 @@
           @set-active="setActiveType"
         />
         <FieldInspector
+          class="field-inspector-panel"
           v-if="selectedField"
           :field="selectedField"
+          :controls="props.fieldInspectorControls"
+          :showDefaultControls="props.showDefaultInspectorControls"
+          :omitDefaultControls="props.omitDefaultInspectorControls"
           @update-field="onUpdateField"
           @delete-field="onDeleteField"
-        />
+        >
+          <template #custom-fields="slotProps">
+            <slot name="field-inspector" v-bind="slotProps" />
+          </template>
+        </FieldInspector>
       </div>
     </div>
   </div>
@@ -105,10 +113,7 @@ const selectedField = computed(
 
 watch(pageSizes, (sizes) => {
   try {
-    console.debug(
-      '[FormBuilder] pageSizes -> length=',
-      (sizes && sizes.length) || 0,
-    );
+    console.debug('[FormBuilder] pageSizes -> length=', (sizes && sizes.length) || 0);
   } catch (e) {
     console.debug('[FormBuilder] pageSizes -> (unable to read length)');
   }

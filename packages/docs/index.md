@@ -56,7 +56,10 @@ function onSigned(payload) {
 
 - [Getting Started](/getting-started) - Overview and core concepts
 - [Installation](/installation) - Setup instructions
-- [Vue Components](/usage/vue-usage) - Build with Vue 3
+- [Vue Usage Overview](/usage/vue-components) - Build with Vue 3 and navigate focused pages by component.
+- [FormBuilder Guide](/usage/form-builder) - Template authoring, props, events, and export flow.
+- [Dynamic Fields Guide](/usage/dynamic-fields) - Dedicated guide for configurable inspector controls and nested metadata paths.
+- [Signer Guide](/usage/signer) - Signing flows, integrity props, and finalized payload handling.
 - [Web Components](/usage/web-components) - Use as custom elements
 - [API Reference](/api/README) - Generated API docs (props, types, utilities)
 - [FormBuilder Props](/api/interfaces/FormBuilderProps) - Builder component props

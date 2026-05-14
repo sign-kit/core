@@ -42,10 +42,113 @@
           <option v-for="loc in localeOptions" :key="loc" :value="loc">{{ loc }}</option>
         </select>
       </div>
+      <div class="props-group">
+        <p class="props-title">Field inspector controls</p>
+        <label class="props-check">
+          <input type="checkbox" v-model="showBuiltInInspectorControls" />
+          Enable built-in controls
+        </label>
+        <div class="props-nested" v-if="showBuiltInInspectorControls">
+          <label class="props-check">
+            <input type="checkbox" v-model="builtInInspectorControlState.label" />
+            Label
+          </label>
+          <label class="props-check">
+            <input type="checkbox" v-model="builtInInspectorControlState.required" />
+            Required
+          </label>
+          <label class="props-check">
+            <input type="checkbox" v-model="builtInInspectorControlState.role" />
+            Role
+          </label>
+        </div>
+      </div>
+      <div class="props-group">
+        <p class="props-title">Custom inspector controls</p>
+
+        <label class="props-check">
+          <input type="checkbox" v-model="customInspectorControlState.assignee.enabled" />
+          Enable assignee dropdown
+        </label>
+        <div class="props-nested" v-if="customInspectorControlState.assignee.enabled">
+          <label class="props-label" for="assignee-label">Assignee label</label>
+          <input
+            id="assignee-label"
+            class="props-input"
+            v-model="customInspectorControlState.assignee.label"
+          />
+
+          <label class="props-label" for="assignee-help">Assignee help text</label>
+          <input
+            id="assignee-help"
+            class="props-input"
+            v-model="customInspectorControlState.assignee.helpText"
+          />
+
+          <label class="props-check">
+            <input
+              type="checkbox"
+              v-model="customInspectorControlState.assignee.includeUnassigned"
+            />
+            Include "Unassigned" option
+          </label>
+        </div>
+
+        <label class="props-check" style="margin-top: 8px">
+          <input type="checkbox" v-model="customInspectorControlState.ticket.enabled" />
+          Enable ticket reference field
+        </label>
+        <div class="props-nested" v-if="customInspectorControlState.ticket.enabled">
+          <label class="props-label" for="ticket-label">Ticket label</label>
+          <input
+            id="ticket-label"
+            class="props-input"
+            v-model="customInspectorControlState.ticket.label"
+          />
+
+          <label class="props-label" for="ticket-placeholder">Ticket placeholder</label>
+          <input
+            id="ticket-placeholder"
+            class="props-input"
+            v-model="customInspectorControlState.ticket.placeholder"
+          />
+
+          <label class="props-label" for="ticket-help">Ticket help text</label>
+          <input
+            id="ticket-help"
+            class="props-input"
+            v-model="customInspectorControlState.ticket.helpText"
+          />
+        </div>
+      </div>
     </teleport>
     <div class="builder-grid">
       <div class="left cardify">
-        <FormBuilder :pdf="pdfUrlValue" v-model="template" :dateLocale="dateLocale" />
+        <FormBuilder
+          :pdf="pdfUrlValue"
+          v-model="template"
+          :dateLocale="dateLocale"
+          :fieldInspectorControls="fieldInspectorControls"
+          :showDefaultInspectorControls="showBuiltInInspectorControls"
+          :omitDefaultInspectorControls="omitDefaultInspectorControls"
+        >
+          <template #field-inspector="{ field, getValue, setValue, save }">
+            <div class="custom-inspector-note">
+              <strong>Custom panel:</strong>
+              Add data from another system directly into the selected field.
+            </div>
+            <div class="custom-inspector-row">
+              <label for="external-account-id">External account id</label>
+              <input
+                id="external-account-id"
+                :value="String(getValue('meta.externalAccountId') || '')"
+                placeholder="acct_123"
+                @input="onExternalAccountInput($event, setValue, save)"
+              />
+            </div>
+            <p class="custom-inspector-hint">Editing field {{ field.id }}</p>
+          </template>
+        </FormBuilder>
       </div>
     </div>
     <div class="cardify">
@@ -65,6 +168,7 @@
 <script lang="ts" setup>
 import { inject, ref, watch, computed } from 'vue';
 import { FormBuilder } from '../../../pdf-sign-kit/src';
+import type { FieldInspectorControl } from '../../../pdf-sign-kit/src';
 
 const pdfUrl = inject('pdfUrl') as any;
 const pdfUrlValue = pdfUrl?.value ?? '/sample/sample.pdf';
@@ -141,6 +245,76 @@ const localeOptions = computed(() => {
   return list;
 });
 
+const externalUsers = [
+  { label: 'Jordan Example (approver)', value: 'usr_1001' },
+  { label: 'Robin Chen (finance)', value: 'usr_1002' },
+  { label: 'Casey Patel (legal)', value: 'usr_1003' },
+];
+
+const customInspectorControlState = ref({
+  assignee: {
+    enabled: true,
+    label: 'Assign user',
+    helpText: 'Choose a user from your upstream system',
+    includeUnassigned: true,
+  },
+  ticket: {
+    enabled: true,
+    label: 'Ticket reference',
+    placeholder: 'TKT-12345',
+    helpText: 'Optional correlation id stored with the field',
+  },
+});
+
+const fieldInspectorControls = computed<FieldInspectorControl[]>(() => {
+  const controls: FieldInspectorControl[] = [];
+  const state = customInspectorControlState.value;
+
+  if (state.assignee.enabled) {
+    controls.push({
+      key: 'assignee-user',
+      type: 'select',
+      label: state.assignee.label,
+      path: 'meta.assigneeUserId',
+      helpText: state.assignee.helpText,
+      options: [
+        ...(state.assignee.includeUnassigned ? [{ label: 'Unassigned', value: null }] : []),
+        ...externalUsers,
+      ],
+    });
+  }
+
+  if (state.ticket.enabled) {
+    controls.push({
+      key: 'ticket-reference',
+      type: 'text',
+      label: state.ticket.label,
+      path: 'meta.ticketReference',
+      placeholder: state.ticket.placeholder,
+      helpText: state.ticket.helpText,
+    });
+  }
+
+  return controls;
+});
+
+const showBuiltInInspectorControls = ref(true);
+const builtInInspectorControlState = ref({
+  label: false,
+  required: true,
+  role: true,
+});
+
+const omitDefaultInspectorControls = computed(() => {
+  if (!showBuiltInInspectorControls.value) return [];
+  const state = builtInInspectorControlState.value;
+  const omit: string[] = [];
+  if (!state.label) omit.push('label');
+  if (!state.required) omit.push('required');
+  if (!state.role) omit.push('role');
+  return omit;
+});
+
 // if the demo provides a global currentTemplate ref, update it when the builder changes
 const currentTemplate = inject('currentTemplate') as any;
 
@@ -189,6 +363,17 @@ async function importTemplate(e: Event) {
   } catch (err) {
     alert('Invalid JSON');
   }
+}
+
+function onExternalAccountInput(
+  event: Event,
+  setValue: (path: string, value: unknown) => void,
+  save: () => void,
+) {
+  const target = event.target as HTMLInputElement | null;
+  setValue('meta.externalAccountId', target?.value || '');
+  // Keep the demo obvious: update the selected field object immediately.
+  save();
 }
 </script>
 
@@ -244,5 +429,60 @@ textarea {
   gap: 8px;
   align-items: center;
   margin-top: 8px;
+}
+.custom-inspector-note {
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(67, 129, 193, 0.08);
+}
+.custom-inspector-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.custom-inspector-row label {
+  font-size: 12px;
+  font-weight: 600;
+}
+.custom-inspector-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.props-group {
+  border-top: 1px solid var(--color-border-default, rgba(0, 0, 0, 0.08));
+  margin-top: 10px;
+  padding-top: 10px;
+}
+.props-title {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+.props-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.props-nested {
+  margin-left: 16px;
+  margin-top: 6px;
+}
+.props-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 8px 0 4px 0;
+}
+.props-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 28px;
 }
 </style>

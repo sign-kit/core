@@ -25,7 +25,16 @@ export default defineConfig({
       {
         text: 'Usage',
         items: [
-          { text: 'Vue Components', link: '/usage/vue-usage' },
+          {
+            text: 'Vue',
+            items: [
+              { text: 'Overview', link: '/usage/vue-components' },
+              { text: 'FormBuilder', link: '/usage/form-builder' },
+              { text: 'Signer', link: '/usage/signer' },
+              { text: 'Dynamic Fields', link: '/usage/dynamic-fields' },
+              { text: 'useSignerManager', link: '/usage/use-signer-manager' },
+            ],
+          },
           { text: 'Web Components', link: '/usage/web-components' },
         ],
       },
@@ -68,11 +77,18 @@ export default defineConfig({
       ],
       '/usage/': [
         {
-          text: 'Usage Guides',
+          text: 'Vue',
           items: [
-            { text: 'Vue Components', link: '/usage/vue-usage' },
-            { text: 'Web Components', link: '/usage/web-components' },
+            { text: 'Overview', link: '/usage/vue-components' },
+            { text: 'FormBuilder', link: '/usage/form-builder' },
+            { text: 'Signer', link: '/usage/signer' },
+            { text: 'Dynamic Fields', link: '/usage/dynamic-fields' },
+            { text: 'useSignerManager', link: '/usage/use-signer-manager' },
           ],
+        },
+        {
+          text: 'Web Components',
+          items: [{ text: 'Web Components', link: '/usage/web-components' }],
         },
       ],
       '/api/': [

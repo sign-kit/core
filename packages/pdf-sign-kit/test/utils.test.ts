@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { canonicalizeTemplate, computePdfHash, computeValuesHash } from '../src/utils/signer';
+import { cloneWithValueAtPath, getValueAtPath } from '../src/utils/objectPath';
 import { webcrypto as nodeCrypto } from 'crypto';
 
 // Ensure Web Crypto is available in Node test environment
@@ -61,5 +62,54 @@ describe('integrity utils', () => {
     const h3 = await computeValuesHash(v3);
     expect(h1).toBe(h2);
     expect(h1).not.toBe(h3);
+  });
+});
+
+describe('objectPath utils', () => {
+  it('reads nested field values by dot path', () => {
+    const field = {
+      id: 'field_1',
+      type: 'text',
+      page: 0,
+      x: 0.1,
+      y: 0.2,
+      width: 0.3,
+      height: 0.1,
+      meta: {
+        assigneeId: 'user_123',
+      },
+      validation: {
+        pattern: '^[A-Z]+$',
+      },
+    };
+
+    expect(getValueAtPath(field, 'meta.assigneeId')).toBe('user_123');
+    expect(getValueAtPath(field, 'validation.pattern')).toBe('^[A-Z]+$');
+    expect(getValueAtPath(field, 'meta.missing')).toBeUndefined();
+  });
+
+  it('clones nested field values without mutating siblings', () => {
+    const field = {
+      id: 'field_2',
+      type: 'text',
+      page: 0,
+      x: 0.1,
+      y: 0.2,
+      width: 0.3,
+      height: 0.1,
+      role: 'requester',
+      meta: {
+        assigneeId: 'user_123',
+        assigneeName: 'Jordan Example',
+      },
+    };
+
+    const updated = cloneWithValueAtPath(field, 'meta.assigneeId', 'user_789');
+
+    expect(updated).not.toBe(field);
+    expect(updated.meta.assigneeId).toBe('user_789');
+    expect(updated.meta.assigneeName).toBe('Jordan Example');
+    expect(field.meta.assigneeId).toBe('user_123');
+    expect(updated.role).toBe('requester');
   });
 });
