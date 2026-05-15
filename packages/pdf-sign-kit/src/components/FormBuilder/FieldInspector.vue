@@ -87,6 +87,10 @@ import { computed, ref, watch } from 'vue';
 import type { Field, FieldInspectorControl } from '../../types';
 import { cloneWithValueAtPath, getValueAtPath } from '../../utils/objectPath';
 
+// Guard flag: true while draft is being reset from an incoming prop change so the
+// deep draft watcher doesn't echo the update back to the parent and cause a loop.
+let isResettingFromProp = false;
+
 const props = defineProps<{
   field: Field;
   controls?: FieldInspectorControl[];
@@ -143,18 +147,22 @@ const activeControls = computed(() => {
 watch(
   () => props.field,
   (f) => {
+    isResettingFromProp = true;
     draft.value = cloneField(f);
+    isResettingFromProp = false;
   },
+  { flush: 'sync' },
 );
 
 watch(
   () => draft.value,
   (newDraft) => {
+    if (isResettingFromProp) return;
     if (props.autoSave !== false) {
       emit('update-field', newDraft);
     }
   },
-  { deep: true }
+  { deep: true, flush: 'sync' },
 );
 
 function cloneField(field: Field): Field {
