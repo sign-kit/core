@@ -18,7 +18,11 @@
   flex: 1;
   max-width: 100%;
 }
-.pdf-builder__content { display: flex; gap: 16px; align-items: flex-start; }
+.pdf-builder__content {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
 .pdf-builder__sidebar {
   display: flex;
   flex-direction: column;
@@ -32,7 +36,15 @@
   max-height: calc(100vh - 16px);
   overflow-y: auto;
 }
-.pdf-builder__bank { width: 180px; padding: 12px; background: var(--sk-color-bg-surface); border-left: 1px solid var(--sk-color-border-default); border-radius: var(--sk-radius-md); box-shadow: var(--sk-shadow-sm); }
+.pdf-builder__bank {
+  width: 180px;
+  padding: 14px;
+  background: var(--sk-color-bg-surface);
+  border-left: 1px solid var(--sk-color-border-default);
+  border-radius: var(--sk-radius-md);
+  box-shadow: var(--sk-shadow-sm);
+  margin-bottom: 2px;
+}
 .pdf-builder__sidebar .pdf-builder__bank {
   width: 100%;
   box-sizing: border-box;
@@ -42,11 +54,32 @@
   box-sizing: border-box;
   margin-top: 0;
 }
-.pdf-builder__bank h4 { margin: 0 0 8px 0; font-size: 14px; }
-.bank-list { display:flex; flex-direction:column; gap:8px; }
-.bank-item { padding: 8px 10px; border: 1px solid var(--sk-color-border-default); border-radius:var(--sk-radius-sm); cursor:grab; user-select:none; background: var(--sk-color-bg-surface-subtle); }
-.bank-item.active { background: rgba(78,205,196,0.08); border-color: var(--sk-color-action-primary); }
-.bank-hint { margin-top:12px; font-size:12px; color:var(--sk-color-text-secondary); }
+.pdf-builder__bank h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+.bank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bank-item {
+  padding: 8px 10px;
+  border: 1px solid var(--sk-color-border-default);
+  border-radius: var(--sk-radius-sm);
+  cursor: grab;
+  user-select: none;
+  background: var(--sk-color-bg-surface-subtle);
+}
+.bank-item.active {
+  background: rgba(78, 205, 196, 0.08);
+  border-color: var(--sk-color-action-primary);
+}
+.bank-hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--sk-color-text-secondary);
+}
 .pdf-page {
   position: relative;
   margin: 12px auto;
@@ -64,7 +97,7 @@
   /* allow pointer events so clicks on the overlay register (used to add fields) */
   pointer-events: auto;
 }
-.toolbar-left{
+.toolbar-left {
   display: flex;
   gap: 8px;
 }
@@ -87,7 +120,11 @@
   color: var(--sk-color-text-primary);
   font-weight: 600;
 }
-.field-box, .field-box .label { user-select: none; -webkit-user-select: none; -ms-user-select: none; }
+.field-box, .field-box .label {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
 .field-handle {
   width: 10px;
   height: 10px;
@@ -95,7 +132,11 @@
   position: absolute;
   border-radius: 2px;
 }
-.field-handle.br { right: 6px; bottom: 6px; cursor: nwse-resize }
+.field-handle.br {
+  right: 6px;
+  bottom: 6px;
+  cursor: nwse-resize;
+}
 .field-delete {
   position: absolute;
   right: -8px;
@@ -123,7 +164,10 @@
 .field-box.field-type-initials .label {
   color: var(--sk-color-jet-black);
 }
-.field-box.dragging { box-shadow: 0 6px 20px rgba(0,0,0,0.12); transform-origin: 0 0; }
+.field-box.dragging {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform-origin: 0 0;
+}
 
 /* drag preview used when dragging from the bank */
 .bank-drag-preview {
