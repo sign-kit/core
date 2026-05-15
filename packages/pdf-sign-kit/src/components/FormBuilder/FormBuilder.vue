@@ -34,6 +34,8 @@
           :controls="props.fieldInspectorControls"
           :showDefaultControls="props.showDefaultInspectorControls"
           :omitDefaultControls="props.omitDefaultInspectorControls"
+          :autoSave="props.autoSave"
+          :hideInspectorSaveButton="props.hideInspectorSaveButton"
           @update-field="onUpdateField"
           @delete-field="onDeleteField"
         >

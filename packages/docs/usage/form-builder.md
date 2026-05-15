@@ -32,6 +32,8 @@ const template = ref({
 - `fieldInspectorControls` (`FieldInspectorControl[]`, default `[]`): Additional configurable inspector controls.
 - `showDefaultInspectorControls` (`boolean`, default `true`): Show or hide built-in inspector rows.
 - `omitDefaultInspectorControls` (`string[]`, default `[]`): Hide specific built-in rows. Available keys: `label`, `required`, `role`.
+- `autoSave` (`boolean`, default `true`): Automatically save field changes without clicking the Save button.
+- `hideInspectorSaveButton` (`boolean`, default `false`): Hide the Save button in the field inspector panel.
 
 ## Events
 
@@ -63,6 +65,41 @@ function saveTemplate() {
   a.click()
 }
 </script>
+```
+
+## Auto-Save Feature
+
+By default, the FormBuilder automatically saves field changes whenever you modify a field in the inspector. This means changes are applied immediately without needing to click the Save button.
+
+```vue
+<template>
+  <!-- Auto-save is enabled by default -->
+  <FormBuilder :pdf="pdfUrl" v-model="template" />
+</template>
+```
+
+To disable auto-save and require manual saves, set `autoSave` to `false`:
+
+```vue
+<template>
+  <!-- Require explicit Save button clicks -->
+  <FormBuilder :pdf="pdfUrl" v-model="template" :autoSave="false" />
+</template>
+```
+
+## Hiding the Save Button
+
+When auto-save is enabled, you can hide the Save button to simplify the inspector UI:
+
+```vue
+<template>
+  <FormBuilder 
+    :pdf="pdfUrl" 
+    v-model="template" 
+    :auto-save="true"
+    :hide-inspector-save-button="true"
+  />
+</template>
 ```
 
 ## Related Guides

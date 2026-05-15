@@ -70,7 +70,13 @@
     />
 
     <div class="inspector-actions">
-      <button class="sk-button sk-button--primary" @click="save">Save</button>
+      <button 
+        v-if="!props.hideInspectorSaveButton"
+        class="sk-button sk-button--primary" 
+        @click="save"
+      >
+        Save
+      </button>
       <button class="sk-button sk-button--danger" @click="del">Delete</button>
     </div>
   </aside>
@@ -86,6 +92,8 @@ const props = defineProps<{
   controls?: FieldInspectorControl[];
   showDefaultControls?: boolean;
   omitDefaultControls?: string[];
+  autoSave?: boolean;
+  hideInspectorSaveButton?: boolean;
 }>();
 const emit = defineEmits<{
   (e: 'update-field', patch: Partial<Field> & { id: string }): void;
@@ -137,6 +145,16 @@ watch(
   (f) => {
     draft.value = cloneField(f);
   },
+);
+
+watch(
+  () => draft.value,
+  (newDraft) => {
+    if (props.autoSave !== false) {
+      emit('update-field', newDraft);
+    }
+  },
+  { deep: true }
 );
 
 function cloneField(field: Field): Field {

@@ -227,6 +227,10 @@ export interface FormBuilderProps {
   showDefaultInspectorControls?: boolean;
   /** Built-in inspector control keys to omit while keeping the rest. */
   omitDefaultInspectorControls?: string[];
+  /** When `true`, automatically save field changes without clicking Save. Default `true`. */
+  autoSave?: boolean;
+  /** When `true`, hides the Save button in the field inspector. Default `false`. */
+  hideInspectorSaveButton?: boolean;
 }
 
 /** Signer identity passed to the `<Signer>` component. */
