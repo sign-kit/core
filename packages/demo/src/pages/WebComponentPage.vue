@@ -32,12 +32,12 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref, onMounted } from 'vue';
+import { inject, ref, onMounted, computed, watch } from 'vue';
 import sampleTemplate from '../data/sample-template.json';
 import { registerPdfSignKitElements } from '../../../pdf-sign-kit/src/web-components/register';
 
 const pdfUrl = inject('pdfUrl') as any;
-const pdfUrlValue = pdfUrl?.value ?? '/sample/sample.pdf';
+const pdfUrlValue = computed(() => pdfUrl?.value ?? '/sample/sample.pdf');
 const manifest = ref<any | null>(null);
 
 // Keep signer defaults aligned with SignerPage.vue.
@@ -115,13 +115,13 @@ onMounted(() => {
     // keep legacy assignment for compatibility with prior integrations.
     builder.template = initialTemplate;
     // pass a plain URL string so the component can fetch and load it
-    builder.pdf = pdfUrlValue;
+    builder.pdf = pdfUrlValue.value;
   }
 
   if (signer) {
     pushTemplateToSigner();
     // Signer component expects `pdfSrc` prop name
-    signer.pdfSrc = pdfUrlValue;
+    signer.pdfSrc = pdfUrlValue.value;
     signer.signer = { ...defaultSigner };
     signer.mode = defaultMode;
     signer.expectedHashes = { ...defaultExpectedHashes };
@@ -170,6 +170,15 @@ onMounted(() => {
       console.log('integrity-verification', e.detail ?? e);
     });
   }
+
+  watch(
+    pdfUrlValue,
+    (nextPdf) => {
+      if (builder) builder.pdf = nextPdf;
+      if (signer) signer.pdfSrc = nextPdf;
+    },
+    { immediate: true },
+  );
 });
 </script>
 

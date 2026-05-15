@@ -57,6 +57,9 @@
         <div class="cardify">
           <h4>PDF Source</h4>
           <input v-model="pdfUrl" placeholder="Enter PDF URL or load sample" />
+          <div style="margin-top: 8px">
+            <input type="file" accept="application/pdf" @change="handleFileInput" />
+          </div>
           <div style="margin-top: 12px">
             <button @click="loadSample">Load sample.pdf</button>
           </div>
@@ -92,15 +95,34 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, provide } from 'vue';
+import { ref, provide, onBeforeUnmount } from 'vue';
 
 const pdfUrl = ref('/sample/sample.pdf');
 const eventLog = ref<string[]>([]);
 const manifest = ref<any | null>(null);
 const currentTemplate = ref<any | null>(null);
+const localObjectUrl = ref<string | null>(null);
 
 function loadSample() {
+  releaseLocalObjectUrl();
   pdfUrl.value = '/sample/sample.pdf';
+}
+
+function releaseLocalObjectUrl() {
+  if (!localObjectUrl.value) return;
+  try {
+    URL.revokeObjectURL(localObjectUrl.value);
+  } catch (e) {
+    // ignore cleanup errors
+  }
+  localObjectUrl.value = null;
+}
+
+function setPdfFromFile(file: File) {
+  releaseLocalObjectUrl();
+  const url = URL.createObjectURL(file);
+  localObjectUrl.value = url;
+  pdfUrl.value = url;
 }
 
 // provide global demo values so pages can use them
@@ -116,10 +138,25 @@ async function handleDrop(e: DragEvent) {
     alert('Please drop a PDF file');
     return;
   }
-  // create an object URL for the preview
-  const url = URL.createObjectURL(file);
-  pdfUrl.value = url;
+  setPdfFromFile(file);
 }
+
+function handleFileInput(e: Event) {
+  const input = e.target as HTMLInputElement | null;
+  const file = input?.files?.[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    alert('Please select a PDF file');
+    input.value = '';
+    return;
+  }
+  setPdfFromFile(file);
+  input.value = '';
+}
+
+onBeforeUnmount(() => {
+  releaseLocalObjectUrl();
+});
 </script>
 
 <style scoped>

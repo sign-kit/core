@@ -79,12 +79,12 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref } from 'vue';
+import { inject, ref, computed } from 'vue';
 import { Signer } from '../../../pdf-sign-kit/src';
 import sampleTemplate from '../data/sample-template.json';
 
 const pdfUrl = inject('pdfUrl') as any;
-const pdfUrlValue = pdfUrl?.value ?? '/sample/sample.pdf';
+const pdfUrlValue = computed(() => pdfUrl?.value ?? '/sample/sample.pdf');
 // capture injected refs during setup so handlers can use them later
 const injectedEventLog = inject('eventLog') as any;
 const injectedManifest = inject('manifest') as any;

@@ -171,7 +171,7 @@ import { FormBuilder } from '../../../pdf-sign-kit/src';
 import type { FieldInspectorControl } from '../../../pdf-sign-kit/src';
 
 const pdfUrl = inject('pdfUrl') as any;
-const pdfUrlValue = pdfUrl?.value ?? '/sample/sample.pdf';
+const pdfUrlValue = computed(() => pdfUrl?.value ?? '/sample/sample.pdf');
 
 const template = ref<any>({
   id: 'demo-tmpl',
