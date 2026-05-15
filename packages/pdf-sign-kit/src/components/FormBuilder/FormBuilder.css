@@ -11,12 +11,12 @@
 }
 .pdf-builder__viewer {
   position: relative;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: visible;
   background: var(--sk-color-bg-surface-subtle);
   padding: 16px;
   flex: 1;
   max-width: 100%;
-  overflow: auto;
 }
 .pdf-builder__content { display: flex; gap: 16px; align-items: flex-start; }
 .pdf-builder__sidebar {
@@ -26,6 +26,11 @@
   flex: 0 0 206px;
   width: 206px;
   min-width: 206px;
+  position: sticky;
+  top: 8px;
+  align-self: flex-start;
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
 }
 .pdf-builder__bank { width: 180px; padding: 12px; background: var(--sk-color-bg-surface); border-left: 1px solid var(--sk-color-border-default); border-radius: var(--sk-radius-md); box-shadow: var(--sk-shadow-sm); }
 .pdf-builder__sidebar .pdf-builder__bank {
