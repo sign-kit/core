@@ -1,6 +1,7 @@
 <template>
   <div
     :class="['field-box', 'sk-field-box', `field-type-${field.type}`]"
+    :data-field-id="field.id"
     :style="style"
     @pointerdown.stop="onPointerDown"
     ref="root"

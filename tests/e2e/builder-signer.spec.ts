@@ -13,6 +13,7 @@ import {
   BUILDER_ROOT,
   BUILDER_TEMPLATE_TEXTAREA,
   SIGNER_ROOT,
+  SIGNER_FIELD_OVERLAY,
   PAGE_CANVAS,
   SIGNER_FINALIZE_BTN,
   MANIFEST_PRE,
@@ -129,6 +130,18 @@ test.describe('Signer finalize flow', () => {
         `FieldValue.value type is unexpected: ${typeof fv.value}`,
       ).toBe(true);
     }
+  });
+
+  test('rendered signer fields expose data-field-id selectors', async ({ page }) => {
+    await page.goto('/signer', { waitUntil: 'networkidle' });
+    await expect(page.locator(SIGNER_ROOT)).toBeVisible({ timeout: 15_000 });
+    await waitForPdfCanvas(page, 30_000);
+
+    const firstField = page.locator(SIGNER_FIELD_OVERLAY).first();
+    await expect(firstField).toHaveAttribute('data-field-id', /.+/);
+    const fieldId = await firstField.getAttribute('data-field-id');
+    expect(fieldId, 'rendered signer field should expose a field id').toBeTruthy();
+    await expect(page.locator(`[data-field-id="${fieldId}"]`)).toBeVisible();
   });
 
   test('integrity-verification event fires and is logged after finalize', async ({ page }) => {

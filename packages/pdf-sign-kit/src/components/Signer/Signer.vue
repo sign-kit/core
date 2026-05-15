@@ -12,6 +12,7 @@
               :key="f.id"
               class="field-overlay"
               :class="`field-type-${f.type}`"
+              :data-field-id="f.id"
               :style="fieldStyle(f, idx)"
             >
               <FieldInput

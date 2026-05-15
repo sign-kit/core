@@ -43,6 +43,21 @@ function onSigned(payload: { values: unknown[]; signedPdf: Blob; manifest: Manif
 | `integrity-check` | `{ templateHash, pdfHash, valuesHash }` | Fired with computed hash values. |
 | `integrity-verification` | `{ ok, verdict, details }` | Fired with integrity verification outcome. |
 
+## Field DOM Selectors
+
+Each rendered signer field includes a `data-field-id` attribute on the field overlay, using the same value as `field.id` from the template.
+
+```html
+<div class="field-overlay" data-field-id="sig1"></div>
+```
+
+This gives host apps a stable selector for behaviors like scrolling a signer to the active field or coordinating external navigation with the rendered PDF.
+
+```ts
+const fieldEl = document.querySelector('[data-field-id="sig1"]')
+fieldEl?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+```
+
 ## Role-Based Example
 
 ```vue

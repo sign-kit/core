@@ -44,6 +44,21 @@ const template = ref({
 | `field-updated` | `Field` | Emitted when a field position, size, or inspector value changes. |
 | `field-removed` | `string` | Emitted with the removed field id. |
 
+## Field DOM Selectors
+
+Each rendered builder field includes a `data-field-id` attribute on its root element, using the same value as `field.id` from the template.
+
+```html
+<div class="field-box" data-field-id="sig1"></div>
+```
+
+This gives host apps a stable selector for behaviors like scrolling a field into view, focusing related UI, or attaching their own observers.
+
+```ts
+const fieldEl = document.querySelector('[data-field-id="sig1"]')
+fieldEl?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+```
+
 ## Save Template Example
 
 ```vue
